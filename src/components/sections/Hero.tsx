@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Download, ArrowRight } from "lucide-react";
-import { Typewriter } from "./Typewriter";
+import { Typewriter } from "@/components/Typewriter";
 import { PROFILE } from "@/lib/profile";
 
 export function Hero() {
