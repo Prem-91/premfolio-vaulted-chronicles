@@ -1,29 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Toaster } from "sonner";
+import { Nav } from "@/components/Nav";
+import { Hero } from "@/components/sections/Hero";
+import { About } from "@/components/sections/About";
+import { Projects } from "@/components/sections/Projects";
+import { Experience } from "@/components/sections/Experience";
+import { Skills } from "@/components/sections/Skills";
+import { Contact } from "@/components/sections/Contact";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Prem Shinde — Full-Stack & Backend Engineer · Pune" },
+      {
+        name: "description",
+        content:
+          "Portfolio of Prem Shinde — Computer Engineering student & full-stack/backend engineer from Pune. React, Node, Python, Cloud, AI.",
+      },
+      { property: "og:title", content: "Prem Shinde — Portfolio" },
+      {
+        property: "og:description",
+        content: "Full-stack & backend engineer building thoughtful software at the intersection of code, cloud and AI.",
+      },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main id="top" className="relative">
+      <Toaster theme="dark" position="bottom-right" />
+      <Nav />
+      <Hero />
+      <About />
+      <Projects />
+      <Experience />
+      <Skills />
+      <Contact />
+    </main>
   );
 }
