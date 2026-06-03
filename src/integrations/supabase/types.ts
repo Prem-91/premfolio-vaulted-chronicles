@@ -14,6 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_profile: {
+        Row: {
+          current_focus: string | null
+          email: string
+          github_url: string
+          id: string
+          initials: string
+          linkedin_url: string
+          location: string
+          long_bio: string
+          name: string
+          resume_url: string
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          current_focus?: string | null
+          email: string
+          github_url: string
+          id?: string
+          initials: string
+          linkedin_url: string
+          location: string
+          long_bio: string
+          name: string
+          resume_url: string
+          tagline: string
+          updated_at?: string
+        }
+        Update: {
+          current_focus?: string | null
+          email?: string
+          github_url?: string
+          id?: string
+          initials?: string
+          linkedin_url?: string
+          location?: string
+          long_bio?: string
+          name?: string
+          resume_url?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
+      experiences: {
+        Row: {
+          created_at: string
+          detail: string
+          id: string
+          kind: string
+          org: string
+          period: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          detail: string
+          id?: string
+          kind?: string
+          org: string
+          period: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string
+          id?: string
+          kind?: string
+          org?: string
+          period?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      moments: {
+        Row: {
+          caption: string | null
+          created_at: string
+          event_date: string | null
+          id: string
+          image_path: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          image_path: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          image_path?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          categories: string[]
+          created_at: string
+          description: string
+          featured: boolean
+          github_url: string | null
+          id: string
+          live_url: string | null
+          name: string
+          sort_order: number
+          stack: string[]
+          year: string | null
+        }
+        Insert: {
+          categories?: string[]
+          created_at?: string
+          description: string
+          featured?: boolean
+          github_url?: string | null
+          id?: string
+          live_url?: string | null
+          name: string
+          sort_order?: number
+          stack?: string[]
+          year?: string | null
+        }
+        Update: {
+          categories?: string[]
+          created_at?: string
+          description?: string
+          featured?: boolean
+          github_url?: string | null
+          id?: string
+          live_url?: string | null
+          name?: string
+          sort_order?: number
+          stack?: string[]
+          year?: string | null
+        }
+        Relationships: []
+      }
+      skills_groups: {
+        Row: {
+          created_at: string
+          id: string
+          items: string[]
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: string[]
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: string[]
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       vault_memories: {
         Row: {
           caption: string | null
@@ -46,7 +235,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
