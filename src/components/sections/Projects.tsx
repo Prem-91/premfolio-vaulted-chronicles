@@ -1,16 +1,17 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, ExternalLink, Star } from "lucide-react";
-import { PROJECTS, type ProjectCategory } from "@/lib/profile";
+import type { Project } from "@/lib/content.functions";
+import { ALL_CATEGORIES } from "@/lib/profile";
 
-const FILTERS: ("All" | ProjectCategory)[] = ["All", "Full-Stack", "Backend", "AI", "Open Source"];
+const FILTERS = ["All", ...ALL_CATEGORIES] as const;
 
-export function Projects() {
+export function Projects({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
 
   const filtered = useMemo(
-    () => (filter === "All" ? PROJECTS : PROJECTS.filter((p) => p.categories.includes(filter))),
-    [filter],
+    () => (filter === "All" ? projects : projects.filter((p) => p.categories.includes(filter))),
+    [filter, projects],
   );
 
   return (
@@ -45,7 +46,7 @@ export function Projects() {
             {filtered.map((p, i) => (
               <motion.article
                 layout
-                key={p.name}
+                key={p.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -90,9 +91,9 @@ export function Projects() {
                 </div>
 
                 <div className="relative mt-6 flex flex-wrap gap-3 pt-4">
-                  {p.github && (
+                  {p.github_url && (
                     <a
-                      href={p.github}
+                      href={p.github_url}
                       target="_blank"
                       rel="noreferrer noopener"
                       className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-cyan"
@@ -100,9 +101,9 @@ export function Projects() {
                       <Github className="h-3.5 w-3.5" /> source
                     </a>
                   )}
-                  {p.live && (
+                  {p.live_url && (
                     <a
-                      href={p.live}
+                      href={p.live_url}
                       target="_blank"
                       rel="noreferrer noopener"
                       className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-cyan"
@@ -115,18 +116,6 @@ export function Projects() {
             ))}
           </AnimatePresence>
         </div>
-
-        <p className="mt-12 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          More on{" "}
-          <a
-            href="https://github.com/Prem-91"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-cyan hover:underline"
-          >
-            github.com/Prem-91
-          </a>
-        </p>
       </div>
     </section>
   );
