@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase } from "lucide-react";
-import { TIMELINE } from "@/lib/profile";
+import type { Experience as Item } from "@/lib/content.functions";
 
-export function Experience() {
+export function Experience({ items }: { items: Item[] }) {
   return (
     <section id="experience" className="relative w-full py-32">
       <div className="mx-auto max-w-5xl px-6">
@@ -13,11 +13,11 @@ export function Experience() {
 
         <div className="relative mt-16 pl-8 md:pl-12">
           <div className="absolute left-2 top-2 bottom-2 w-px bg-gradient-to-b from-cyan/60 via-border to-transparent md:left-4" />
-          {TIMELINE.map((item, i) => {
+          {items.map((item, i) => {
             const Icon = item.kind === "edu" ? GraduationCap : Briefcase;
             return (
               <motion.div
-                key={item.title + i}
+                key={item.id}
                 initial={{ opacity: 0, x: -16 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
@@ -28,7 +28,9 @@ export function Experience() {
                   <Icon className="h-3 w-3 text-cyan" />
                 </div>
                 <div className="rounded-xl border border-border glass p-5">
-                  <div className="font-mono text-xs uppercase tracking-widest text-cyan">{item.period}</div>
+                  <div className="font-mono text-xs uppercase tracking-widest text-cyan">
+                    {item.period}
+                  </div>
                   <h3 className="mt-2 font-display text-xl font-semibold">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.org}</p>
                   <p className="mt-2 text-sm leading-relaxed text-foreground/80">{item.detail}</p>

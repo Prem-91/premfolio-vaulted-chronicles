@@ -1,9 +1,15 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Download, ArrowRight } from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
+import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
 
-export function Hero() {
+export function Hero({ about }: { about: About | null }) {
+  const name = about?.name ?? PROFILE.name;
+  const tagline = about?.tagline ?? PROFILE.tagline;
+  const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
+  const parts = name.split(" ");
+
   return (
     <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
       <div className="grid-bg pointer-events-none absolute inset-0" />
@@ -31,13 +37,13 @@ export function Hero() {
           transition={{ delay: 0.25, duration: 0.8 }}
           className="mt-6 font-display text-[clamp(2.8rem,9vw,7.5rem)] font-bold leading-[0.95] tracking-tighter"
         >
-          {PROFILE.name.split(" ")[0]}
+          {parts[0]}
           <br />
-          <span className="text-glow text-cyan">{PROFILE.name.split(" ")[1]}.</span>
+          <span className="text-glow text-cyan">{parts.slice(1).join(" ")}.</span>
         </motion.h1>
 
         <div className="mt-8 max-w-2xl font-mono text-base text-muted-foreground sm:text-lg">
-          <Typewriter text={PROFILE.tagline} startDelay={900} />
+          <Typewriter text={tagline} startDelay={900} />
         </div>
 
         <motion.div
@@ -54,7 +60,7 @@ export function Hero() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
           <a
-            href={PROFILE.resumeUrl}
+            href={resumeUrl}
             download
             className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-6 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan"
           >
@@ -81,7 +87,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-cyan animate-float"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-float text-cyan"
       >
         <ArrowDown className="h-5 w-5" />
       </motion.a>
