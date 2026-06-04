@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowDown, Download, ArrowRight } from "lucide-react";
+import { ArrowDown, Download, ArrowRight, Github, Linkedin } from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
@@ -8,10 +8,14 @@ export function Hero({ about }: { about: About | null }) {
   const name = about?.name ?? PROFILE.name;
   const tagline = about?.tagline ?? PROFILE.tagline;
   const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
+  const github = about?.github_url ?? PROFILE.github;
+  const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
   const parts = name.split(" ");
 
   return (
-    <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
+    <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden scanlines">
+      {/* Layered ambient backdrop */}
+      <div className="aurora" />
       <div className="grid-bg pointer-events-none absolute inset-0" />
       <div
         className="pointer-events-none absolute inset-0"
@@ -20,16 +24,28 @@ export function Hero({ about }: { about: About | null }) {
             "radial-gradient(60% 50% at 70% 30%, color-mix(in oklab, var(--cyan) 14%, transparent), transparent 70%)",
         }}
       />
+      {/* Vignette */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, oklch(0.08 0.01 250 / 0.7) 100%)",
+        }}
+      />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24">
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="font-mono text-xs uppercase tracking-[0.3em] text-cyan"
+          className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan backdrop-blur"
         >
-          ● Available for opportunities · Pune, India
-        </motion.p>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
+          </span>
+          Available · Pune, India
+        </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
@@ -37,7 +53,7 @@ export function Hero({ about }: { about: About | null }) {
           transition={{ delay: 0.25, duration: 0.8 }}
           className="mt-6 font-display text-[clamp(2.8rem,9vw,7.5rem)] font-bold leading-[0.95] tracking-tighter"
         >
-          {parts[0]}
+          <span className="text-shimmer">{parts[0]}</span>
           <br />
           <span className="text-glow text-cyan">{parts.slice(1).join(" ")}.</span>
         </motion.h1>
@@ -54,10 +70,11 @@ export function Hero({ about }: { about: About | null }) {
         >
           <a
             href="#projects"
-            className="group inline-flex items-center gap-2 rounded-full bg-cyan px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:glow-cyan"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-cyan px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:glow-cyan"
           >
-            View Work
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <span className="relative z-10">View Work</span>
+            <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
           </a>
           <a
             href={resumeUrl}
@@ -66,6 +83,24 @@ export function Hero({ about }: { about: About | null }) {
           >
             <Download className="h-4 w-4" />
             Download Resume
+          </a>
+          <a
+            href={github}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="GitHub"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
+          >
+            <Github className="h-4 w-4" />
+          </a>
+          <a
+            href={linkedin}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="LinkedIn"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
+          >
+            <Linkedin className="h-4 w-4" />
           </a>
         </motion.div>
 

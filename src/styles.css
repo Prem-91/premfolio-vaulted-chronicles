@@ -162,4 +162,103 @@
     50% { transform: translateY(-6px); }
   }
   .animate-float { animation: float 3s ease-in-out infinite; }
+
+  /* Aurora — slow drifting cyan/indigo blobs for hero ambience */
+  @keyframes aurora-drift {
+    0%   { transform: translate3d(0,0,0) scale(1); }
+    50%  { transform: translate3d(4%, -3%, 0) scale(1.08); }
+    100% { transform: translate3d(0,0,0) scale(1); }
+  }
+  .aurora {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: 0.5;
+    background:
+      radial-gradient(35% 30% at 20% 30%, color-mix(in oklab, var(--cyan) 55%, transparent), transparent 70%),
+      radial-gradient(30% 28% at 80% 20%, oklch(0.6 0.18 280 / 0.45), transparent 70%),
+      radial-gradient(40% 35% at 60% 80%, color-mix(in oklab, var(--cyan) 35%, transparent), transparent 70%);
+    animation: aurora-drift 18s ease-in-out infinite;
+  }
+
+  /* Conic gradient border (use on a wrapper, child has the real bg) */
+  .border-gradient {
+    position: relative;
+    isolation: isolate;
+  }
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 180deg at 50% 50%,
+      color-mix(in oklab, var(--cyan) 60%, transparent),
+      transparent 25%,
+      transparent 75%,
+      color-mix(in oklab, var(--cyan) 60%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .border-gradient:hover::before { opacity: 0.9; }
+
+  /* Spotlight follows mouse via --mx/--my CSS vars set in JS */
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      280px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in oklab, var(--cyan) 22%, transparent),
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .spotlight:hover::after { opacity: 1; }
+
+  /* Subtle scanline overlay for cinematic feel */
+  .scanlines::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      color-mix(in oklab, var(--cyan) 4%, transparent) 4px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .text-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--foreground) 0%,
+      var(--cyan) 50%,
+      var(--foreground) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
 }
