@@ -52,7 +52,18 @@ export function Projects({ projects }: { projects: Project[] }) {
                 exit={{ opacity: 0, y: -10 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: i * 0.05 }}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border glass p-6 transition hover:border-cyan/40 hover:glow-cyan md:p-8 ${
+                onMouseMove={(e) => {
+                  const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  (e.currentTarget as HTMLElement).style.setProperty(
+                    "--mx",
+                    `${e.clientX - r.left}px`,
+                  );
+                  (e.currentTarget as HTMLElement).style.setProperty(
+                    "--my",
+                    `${e.clientY - r.top}px`,
+                  );
+                }}
+                className={`group spotlight border-gradient relative flex flex-col overflow-hidden rounded-2xl border border-border glass p-6 transition hover:glow-cyan md:p-8 ${
                   p.featured ? "md:col-span-4" : "md:col-span-3"
                 } ${i === 0 ? "md:col-span-4" : ""}`}
               >
@@ -72,7 +83,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                   )}
                 </div>
 
-                <h3 className="relative mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+                <h3 className="relative mt-4 font-display text-3xl font-bold tracking-tight transition-colors duration-300 group-hover:text-cyan sm:text-4xl">
                   {p.name}
                 </h3>
                 <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -83,14 +94,14 @@ export function Projects({ projects }: { projects: Project[] }) {
                   {p.stack.map((s) => (
                     <span
                       key={s}
-                      className="rounded-md border border-border bg-white/5 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+                      className="rounded-md border border-border bg-white/5 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition group-hover:border-cyan/30 group-hover:text-foreground"
                     >
                       {s}
                     </span>
                   ))}
                 </div>
 
-                <div className="relative mt-6 flex flex-wrap gap-3 pt-4">
+                <div className="relative mt-auto flex flex-wrap gap-3 pt-6">
                   {p.github_url && (
                     <a
                       href={p.github_url}

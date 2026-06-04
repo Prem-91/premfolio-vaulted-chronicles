@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const BUCKET = "moments";
 
@@ -86,6 +87,7 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
 
 // ---------- ADMIN HELPER ----------
 async function assertAdmin(supabase: any) {
+  enforceRateLimit("admin");
   const { data, error } = await supabase.rpc("is_admin");
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden: admin only");
