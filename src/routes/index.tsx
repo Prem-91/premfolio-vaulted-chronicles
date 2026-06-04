@@ -35,11 +35,14 @@ export const Route = createFileRoute("/")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(portfolioQO),
   component: Index,
-  errorComponent: ({ error }) => (
-    <div className="p-10 text-center text-sm text-muted-foreground">
-      Couldn't load the portfolio: {error.message}
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    console.error(error);
+    return (
+      <div className="p-10 text-center text-sm text-muted-foreground">
+        Unable to load the portfolio right now. Please try again later.
+      </div>
+    );
+  },
 });
 
 function Index() {
