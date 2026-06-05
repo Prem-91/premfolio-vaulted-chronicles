@@ -161,10 +161,8 @@ export function Contact({ about }: { about: About | null }) {
 
       <footer className="mt-24 border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-8 text-xs text-muted-foreground sm:flex-row">
-          <span className="font-mono">
-            © {new Date().getFullYear()} {name}
-          </span>
-          <span className="font-mono">crafted in Pune · &lt;/&gt; with care</span>
+          <span className="font-mono">© {name}</span>
+          <span className="font-mono">designed &amp; built from scratch · &lt;/&gt; with care</span>
         </div>
       </footer>
     </section>
