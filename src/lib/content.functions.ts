@@ -287,7 +287,14 @@ export const deleteMoment = createServerFn({ method: "POST" })
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("is_admin");
+    const email = (context.claims?.email as string | undefined)?.toLowerCase();
+    if (!email) return { isAdmin: false };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("admin_emails")
+      .select("email")
+      .ilike("email", email)
+      .maybeSingle();
     if (error) return { isAdmin: false };
     return { isAdmin: !!data };
   });
