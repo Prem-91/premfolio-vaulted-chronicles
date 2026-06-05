@@ -308,4 +308,3 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
     if (!email) return { isAdmin: false };
     return { isAdmin: await isAllowlistedEmail(email) };
   });
-  });
