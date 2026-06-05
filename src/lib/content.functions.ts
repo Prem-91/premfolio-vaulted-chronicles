@@ -132,7 +132,7 @@ export const updateAbout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase, context.claims);
+    await assertAdmin(supabase, context.claims, context.userId);
     const { id, ...patch } = data;
     const { error } = await supabase.from("about_profile").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
@@ -158,7 +158,7 @@ export const upsertProject = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof projectInput>) => projectInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase, context.claims);
+    await assertAdmin(supabase, context.claims, context.userId);
     const payload = {
       ...data,
       github_url: data.github_url || null,
@@ -178,7 +178,7 @@ export const deleteProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("projects").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -199,7 +199,7 @@ export const upsertExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof expInput>) => expInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("experiences").update(payload).eq("id", data.id)
@@ -212,7 +212,7 @@ export const deleteExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("experiences").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -230,7 +230,7 @@ export const upsertSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof skillInput>) => skillInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("skills_groups").update(payload).eq("id", data.id)
@@ -243,7 +243,7 @@ export const deleteSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("skills_groups").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -264,7 +264,7 @@ export const createMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof momentInput>) => momentInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const bin = Buffer.from(data.image_base64, "base64");
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -288,7 +288,7 @@ export const deleteMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("moments")
