@@ -86,18 +86,28 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
 });
 
 // ---------- ADMIN HELPER ----------
-async function assertAdmin(_supabase: any, claims?: any) {
-  enforceRateLimit("admin");
-  const email = (claims?.email as string | undefined)?.toLowerCase();
-  if (!email) throw new Error("Forbidden: admin only");
+async function resolveUserEmail(claims: any, userId: string): Promise<string | null> {
+  const fromClaims = (claims?.email as string | undefined)?.toLowerCase();
+  if (fromClaims) return fromClaims;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
+  return data?.user?.email?.toLowerCase() ?? null;
+}
+
+async function isAllowlistedEmail(email: string): Promise<boolean> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
     .from("admin_emails")
     .select("email")
     .ilike("email", email)
     .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden: admin only");
+  return !!data;
+}
+
+async function assertAdmin(_supabase: any, claims?: any, userId?: string) {
+  enforceRateLimit("admin");
+  const email = await resolveUserEmail(claims, userId ?? "");
+  if (!email || !(await isAllowlistedEmail(email))) throw new Error("Forbidden: admin only");
 }
 
 // ---------- ABOUT ----------
@@ -122,7 +132,7 @@ export const updateAbout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase, context.claims);
+    await assertAdmin(supabase, context.claims, context.userId);
     const { id, ...patch } = data;
     const { error } = await supabase.from("about_profile").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
@@ -148,7 +158,7 @@ export const upsertProject = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof projectInput>) => projectInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase, context.claims);
+    await assertAdmin(supabase, context.claims, context.userId);
     const payload = {
       ...data,
       github_url: data.github_url || null,
@@ -168,7 +178,7 @@ export const deleteProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("projects").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -189,7 +199,7 @@ export const upsertExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof expInput>) => expInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("experiences").update(payload).eq("id", data.id)
@@ -202,7 +212,7 @@ export const deleteExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("experiences").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -220,7 +230,7 @@ export const upsertSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof skillInput>) => skillInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("skills_groups").update(payload).eq("id", data.id)
@@ -233,7 +243,7 @@ export const deleteSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("skills_groups").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -254,7 +264,7 @@ export const createMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof momentInput>) => momentInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const bin = Buffer.from(data.image_base64, "base64");
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -278,7 +288,7 @@ export const deleteMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.claims);
+    await assertAdmin(context.supabase, context.claims, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("moments")
@@ -294,14 +304,7 @@ export const deleteMoment = createServerFn({ method: "POST" })
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const email = (context.claims?.email as string | undefined)?.toLowerCase();
+    const email = await resolveUserEmail(context.claims, context.userId);
     if (!email) return { isAdmin: false };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("admin_emails")
-      .select("email")
-      .ilike("email", email)
-      .maybeSingle();
-    if (error) return { isAdmin: false };
-    return { isAdmin: !!data };
+    return { isAdmin: await isAllowlistedEmail(email) };
   });
