@@ -86,9 +86,16 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
 });
 
 // ---------- ADMIN HELPER ----------
-async function assertAdmin(supabase: any) {
+async function assertAdmin(_supabase: any, claims?: any) {
   enforceRateLimit("admin");
-  const { data, error } = await supabase.rpc("is_admin");
+  const email = (claims?.email as string | undefined)?.toLowerCase();
+  if (!email) throw new Error("Forbidden: admin only");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("admin_emails")
+    .select("email")
+    .ilike("email", email)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden: admin only");
 }
