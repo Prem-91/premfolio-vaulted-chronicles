@@ -86,9 +86,16 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
 });
 
 // ---------- ADMIN HELPER ----------
-async function assertAdmin(supabase: any) {
+async function assertAdmin(_supabase: any, claims?: any) {
   enforceRateLimit("admin");
-  const { data, error } = await supabase.rpc("is_admin");
+  const email = (claims?.email as string | undefined)?.toLowerCase();
+  if (!email) throw new Error("Forbidden: admin only");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("admin_emails")
+    .select("email")
+    .ilike("email", email)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden: admin only");
 }
@@ -115,7 +122,7 @@ export const updateAbout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase);
+    await assertAdmin(supabase, context.claims);
     const { id, ...patch } = data;
     const { error } = await supabase.from("about_profile").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
@@ -141,7 +148,7 @@ export const upsertProject = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof projectInput>) => projectInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    await assertAdmin(supabase);
+    await assertAdmin(supabase, context.claims);
     const payload = {
       ...data,
       github_url: data.github_url || null,
@@ -161,7 +168,7 @@ export const deleteProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const { error } = await context.supabase.from("projects").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -182,7 +189,7 @@ export const upsertExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof expInput>) => expInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("experiences").update(payload).eq("id", data.id)
@@ -195,7 +202,7 @@ export const deleteExperience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const { error } = await context.supabase.from("experiences").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -213,7 +220,7 @@ export const upsertSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof skillInput>) => skillInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const payload = { ...data, sort_order: data.sort_order ?? 999 };
     const { error } = data.id
       ? await context.supabase.from("skills_groups").update(payload).eq("id", data.id)
@@ -226,7 +233,7 @@ export const deleteSkillGroup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const { error } = await context.supabase.from("skills_groups").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -247,7 +254,7 @@ export const createMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof momentInput>) => momentInput.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const bin = Buffer.from(data.image_base64, "base64");
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -271,7 +278,7 @@ export const deleteMoment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase);
+    await assertAdmin(context.supabase, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("moments")
@@ -287,7 +294,14 @@ export const deleteMoment = createServerFn({ method: "POST" })
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("is_admin");
+    const email = (context.claims?.email as string | undefined)?.toLowerCase();
+    if (!email) return { isAdmin: false };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("admin_emails")
+      .select("email")
+      .ilike("email", email)
+      .maybeSingle();
     if (error) return { isAdmin: false };
     return { isAdmin: !!data };
   });
