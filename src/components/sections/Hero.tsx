@@ -1,8 +1,16 @@
 import { motion } from "framer-motion";
-import { ArrowDown, Download, ArrowRight, Github, Linkedin } from "lucide-react";
+import { ArrowDown, Download, ArrowRight, Github, Linkedin, Sparkles } from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
+import { Starfield } from "@/components/Starfield";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
+
+const STATS = [
+  { big: "10+", label: "projects shipped" },
+  { big: "AI", label: "+ realtime systems" },
+  { big: "∞", label: "hackathon builds" },
+  { big: "FS", label: "full-stack depth" },
+];
 
 export function Hero({ about }: { about: About | null }) {
   const name = about?.name ?? PROFILE.name;
@@ -12,65 +20,79 @@ export function Hero({ about }: { about: About | null }) {
   const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
   const parts = name.split(" ");
 
+  const phrases = [
+    tagline,
+    "Building backend systems",
+    "Shipping full-stack products",
+    "Exploring AI & cloud",
+  ].filter(Boolean);
+
   return (
     <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden scanlines">
       {/* Layered ambient backdrop */}
       <div className="aurora" />
       <div className="grid-bg pointer-events-none absolute inset-0" />
+      <Starfield />
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 50% at 70% 30%, color-mix(in oklab, var(--cyan) 14%, transparent), transparent 70%)",
+            "radial-gradient(60% 50% at 50% 8%, color-mix(in oklab, oklch(0.6 0.18 285) 18%, transparent), transparent 70%)",
         }}
       />
+      <div className="beam pointer-events-none absolute inset-x-0 top-0 h-[60vh]" />
       {/* Vignette */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, oklch(0.08 0.01 250 / 0.7) 100%)",
+            "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, oklch(0.08 0.01 250 / 0.75) 100%)",
         }}
       />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 py-24 text-center sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-cyan backdrop-blur"
+          className="inline-flex max-w-full items-center gap-2 rounded-full border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.25em] text-cyan backdrop-blur sm:text-[10px] sm:tracking-[0.3em]"
         >
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
-          </span>
-          Available · Pune, India
+          <Sparkles className="h-3 w-3 shrink-0" />
+          Available for work · Engineering portfolio
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.8 }}
-          className="mt-6 font-display text-[clamp(2.8rem,9vw,7.5rem)] font-bold leading-[0.95] tracking-tighter"
+          className="mx-auto mt-6 max-w-5xl font-display text-[clamp(2.6rem,11vw,7rem)] font-bold leading-[0.95] tracking-tighter"
         >
-          <span className="text-shimmer">{parts[0]}</span>
-          <br />
-          <span className="text-glow text-cyan">{parts.slice(1).join(" ")}.</span>
+          <span className="text-foreground">{parts[0]}</span>{" "}
+          <span className="text-gradient-cyan text-glow">{parts.slice(1).join(" ")}</span>
         </motion.h1>
 
-        <div className="mt-8 max-w-2xl font-mono text-base text-muted-foreground sm:text-lg">
-          <Typewriter text={tagline} startDelay={900} />
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:text-xs"
+        >
+          Full-stack · Backend · Cloud &amp; AI
+        </motion.p>
+
+        <div className="mx-auto mt-6 min-h-[3.5rem] max-w-3xl font-display text-xl text-cyan sm:text-3xl">
+          <Typewriter text={phrases} startDelay={800} loop speed={55} />
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6 }}
-          className="mt-10 flex flex-wrap items-center gap-3"
+          transition={{ delay: 1.2 }}
+          className="mt-9 flex flex-wrap items-center justify-center gap-3"
         >
           <a
             href="#projects"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-cyan px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:glow-cyan"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-cyan px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:glow-cyan sm:px-6"
           >
             <span className="relative z-10">View Work</span>
             <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -78,11 +100,12 @@ export function Hero({ about }: { about: About | null }) {
           </a>
           <a
             href={resumeUrl}
-            download
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-6 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan sm:px-6"
           >
             <Download className="h-4 w-4" />
-            Download Resume
+            Resume
           </a>
           <a
             href={github}
@@ -104,16 +127,24 @@ export function Hero({ about }: { about: About | null }) {
           </a>
         </motion.div>
 
-        <div className="mt-20 flex items-end justify-between gap-6 border-t border-border pt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          <div className="space-y-1">
-            <div className="text-cyan/80">// stack</div>
-            <div>React · Node · Python · Cloud · AI</div>
-          </div>
-          <div className="space-y-1 text-right">
-            <div className="text-cyan/80">// focus</div>
-            <div>Full-stack · Backend · DevOps</div>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+          className="mx-auto mt-14 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
+        >
+          {STATS.map((s) => (
+            <div
+              key={s.label}
+              className="border-gradient rounded-2xl border border-border glass px-3 py-5 transition hover:glow-cyan"
+            >
+              <div className="font-display text-2xl font-bold text-cyan sm:text-3xl">{s.big}</div>
+              <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-muted-foreground sm:text-[10px]">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
 
       <motion.a
@@ -122,7 +153,7 @@ export function Hero({ about }: { about: About | null }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-float text-cyan"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 animate-float text-cyan"
       >
         <ArrowDown className="h-5 w-5" />
       </motion.a>
