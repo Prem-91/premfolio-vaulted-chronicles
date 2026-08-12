@@ -37,6 +37,7 @@ import {
   type Experience,
   type SkillsGroup,
   type Moment,
+  uploadResume,
 } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -383,8 +384,9 @@ function AboutEditor({ about, onSaved }: { about: About | null; onSaved: () => v
         {F("current_focus", "Current focus")}
         {F("github_url", "GitHub URL")}
         {F("linkedin_url", "LinkedIn URL")}
-        {F("resume_url", "Resume URL")}
+        {F("resume_url", "Resume URL / storage ref")}
       </div>
+      <ResumeUpload aboutId={form.id} onDone={onSaved} />
       <div className="mt-4">{F("long_bio", "Long bio", "textarea")}</div>
       <div className="mt-5 flex justify-end">
         <button onClick={save} disabled={busy} className={btnPrimary}>
