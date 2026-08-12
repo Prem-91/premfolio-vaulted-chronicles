@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const BUCKET = "moments";
+const RESUME_BUCKET = "resume";
 
 // ---------- TYPES ----------
 export type About = {
@@ -76,14 +77,52 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
     }),
   );
 
+  let about = (aboutQ.data ?? null) as About | null;
+  if (about?.resume_url?.startsWith("storage:")) {
+    const path = about.resume_url.slice("storage:".length);
+    const { data: signed } = await supabaseAdmin.storage
+      .from(RESUME_BUCKET)
+      .createSignedUrl(path, 60 * 60 * 6);
+    about = { ...about, resume_url: signed?.signedUrl ?? "#" };
+  }
+
   return {
-    about: (aboutQ.data ?? null) as About | null,
+    about,
     projects: (projectsQ.data ?? []) as Project[],
     experiences: (expQ.data ?? []) as Experience[],
     skills: (skillsQ.data ?? []) as SkillsGroup[],
     moments,
   };
 });
+
+// ---------- RESUME UPLOAD ----------
+const resumeInput = z.object({
+  id: z.string().uuid(),
+  file_base64: z.string().min(10),
+  content_type: z.string().min(3).max(120),
+  filename: z.string().min(1).max(200),
+});
+
+export const uploadResume = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof resumeInput>) => resumeInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const bin = Buffer.from(data.file_base64, "base64");
+    const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${Date.now()}-${safe}`;
+    const { error: upErr } = await supabaseAdmin.storage
+      .from(RESUME_BUCKET)
+      .upload(path, bin, { contentType: data.content_type || "application/pdf", upsert: false });
+    if (upErr) throw new Error(upErr.message);
+    const { error } = await supabaseAdmin
+      .from("about_profile")
+      .update({ resume_url: `storage:${path}` })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
 
 // ---------- ADMIN HELPER ----------
 async function resolveUserEmail(claims: any, userId: string): Promise<string | null> {
