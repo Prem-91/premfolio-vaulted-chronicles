@@ -68,7 +68,7 @@ export function Hero({ about }: { about: About | null }) {
           className="mx-auto mt-6 max-w-5xl font-display text-[clamp(2.6rem,11vw,7rem)] font-bold leading-[0.95] tracking-tighter"
         >
           <span className="text-foreground">{parts[0]}</span>{" "}
-          <span className="text-gradient-cyan text-glow">{parts.slice(1).join(" ")}</span>
+          <span className="text-gradient-cyan">{parts.slice(1).join(" ")}</span>
         </motion.h1>
 
         <motion.p

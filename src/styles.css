@@ -296,8 +296,10 @@
     background: none;
     border: 0;
     cursor: pointer;
-    margin-bottom: -34px;
     transition: transform 0.35s ease, filter 0.35s ease;
+  }
+  .hex-cell {
+    margin-bottom: -34px;
   }
   .hex-cell:nth-child(even) {
     transform: translateY(38px);
@@ -335,15 +337,18 @@
   }
 
   @media (min-width: 640px) {
-    .hex { width: 168px; height: 194px; margin-bottom: -44px; }
+    .hex { width: 168px; height: 194px; }
+    .hex-cell { margin-bottom: -44px; }
     .hex-cell:nth-child(even) { transform: translateY(48px); }
   }
   @media (min-width: 1024px) {
-    .hex { width: 196px; height: 226px; margin-bottom: -52px; }
+    .hex { width: 196px; height: 226px; }
+    .hex-cell { margin-bottom: -52px; }
     .hex-cell:nth-child(even) { transform: translateY(56px); }
   }
   @media (max-width: 420px) {
-    .hex { width: 112px; height: 129px; margin-bottom: -28px; }
+    .hex { width: 112px; height: 129px; }
+    .hex-cell { margin-bottom: -28px; }
     .hex-cell:nth-child(even) { transform: translateY(32px); }
   }
 }
