@@ -264,10 +264,10 @@
 
   /* Cyan → indigo gradient headline */
   .text-gradient-cyan {
-    background: linear-gradient(100deg, var(--cyan) 0%, oklch(0.8 0.13 210) 45%, oklch(0.65 0.18 285) 100%);
+    background-image: linear-gradient(100deg, var(--cyan) 0%, oklch(0.8 0.13 210) 45%, oklch(0.65 0.18 285) 100%);
+    background-clip: text;
     -webkit-background-clip: text;
-            background-clip: text;
-    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
   /* Soft top-down light beam */
@@ -299,7 +299,7 @@
     margin-bottom: -34px;
     transition: transform 0.35s ease, filter 0.35s ease;
   }
-  .hex:nth-child(even) {
+  .hex-cell:nth-child(even) {
     transform: translateY(38px);
   }
   .hex:hover {
@@ -336,15 +336,15 @@
 
   @media (min-width: 640px) {
     .hex { width: 168px; height: 194px; margin-bottom: -44px; }
-    .hex:nth-child(even) { transform: translateY(48px); }
+    .hex-cell:nth-child(even) { transform: translateY(48px); }
   }
   @media (min-width: 1024px) {
     .hex { width: 196px; height: 226px; margin-bottom: -52px; }
-    .hex:nth-child(even) { transform: translateY(56px); }
+    .hex-cell:nth-child(even) { transform: translateY(56px); }
   }
   @media (max-width: 420px) {
     .hex { width: 112px; height: 129px; margin-bottom: -28px; }
-    .hex:nth-child(even) { transform: translateY(32px); }
+    .hex-cell:nth-child(even) { transform: translateY(32px); }
   }
 }
 

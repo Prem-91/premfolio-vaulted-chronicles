@@ -30,8 +30,8 @@ export function Moments({ items }: { items: Moment[] }) {
         {/* Honeycomb grid */}
         <div className="honeycomb mt-12">
           {items.map((m, i) => (
+            <div key={m.id} className="hex-cell">
             <motion.button
-              key={m.id}
               type="button"
               onClick={() => setLightbox(m)}
               initial={{ opacity: 0, scale: 0.85 }}
@@ -62,6 +62,7 @@ export function Moments({ items }: { items: Moment[] }) {
                 </span>
               </span>
             </motion.button>
+            </div>
           ))}
         </div>
       </div>
