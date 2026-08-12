@@ -69,6 +69,7 @@ export function Hero({ about }: { about: About | null }) {
         >
           <span className="text-foreground">{parts[0]}</span>{" "}
           <span
+            className="inline-block"
             style={{
               backgroundImage:
                 "linear-gradient(100deg, var(--cyan) 0%, oklch(0.8 0.13 210) 45%, oklch(0.65 0.18 285) 100%)",
