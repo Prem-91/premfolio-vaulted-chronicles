@@ -68,7 +68,18 @@ export function Hero({ about }: { about: About | null }) {
           className="mx-auto mt-6 max-w-5xl font-display text-[clamp(2.6rem,11vw,7rem)] font-bold leading-[0.95] tracking-tighter"
         >
           <span className="text-foreground">{parts[0]}</span>{" "}
-          <span className="text-gradient-cyan">{parts.slice(1).join(" ")}</span>
+          <span
+            style={{
+              backgroundImage:
+                "linear-gradient(100deg, var(--cyan) 0%, oklch(0.8 0.13 210) 45%, oklch(0.65 0.18 285) 100%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              color: "transparent",
+            }}
+          >
+            {parts.slice(1).join(" ")}
+          </span>
         </motion.h1>
 
         <motion.p
