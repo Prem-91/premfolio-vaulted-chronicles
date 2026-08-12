@@ -397,6 +397,66 @@ function AboutEditor({ about, onSaved }: { about: About | null; onSaved: () => v
   );
 }
 
+function ResumeUpload({ aboutId, onDone }: { aboutId: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+
+  const onDrop = useCallback(
+    async (files: File[]) => {
+      const file = files[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error("File too large (max 8MB).");
+        return;
+      }
+      setBusy(true);
+      try {
+        const buf = await file.arrayBuffer();
+        let binary = "";
+        const bytes = new Uint8Array(buf);
+        for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]!);
+        await uploadResume({
+          data: {
+            id: aboutId,
+            file_base64: btoa(binary),
+            content_type: file.type || "application/pdf",
+            filename: file.name,
+          },
+        });
+        toast.success("Resume updated.");
+        onDone();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Upload failed");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [aboutId, onDone],
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] },
+    multiple: false,
+  });
+
+  return (
+    <div
+      {...getRootProps()}
+      className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition ${
+        isDragActive ? "border-cyan bg-cyan/5" : "border-border bg-white/5 hover:border-cyan/50"
+      }`}
+    >
+      <input {...getInputProps()} />
+      <Upload className="h-5 w-5 text-cyan" />
+      <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {busy ? "uploading…" : "drop new resume (pdf) or click to replace"}
+      </p>
+    </div>
+  );
+}
+
+
+
 // ---------------- PROJECTS ----------------
 
 const emptyProject: Omit<Project, "id"> & { id?: string } = {
