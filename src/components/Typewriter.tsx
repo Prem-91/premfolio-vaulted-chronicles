@@ -18,7 +18,7 @@ export function Typewriter({
   deleteSpeed?: number;
 }) {
   const [shown, setShown] = useState("");
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const phrases = Array.isArray(text) ? text.filter(Boolean) : [text];
