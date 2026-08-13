@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Nav } from "@/components/Nav";
+import { BottomDock } from "@/components/BottomDock";
+
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Projects } from "@/components/sections/Projects";
@@ -47,17 +49,25 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data } = useSuspenseQuery(portfolioQO);
+  const stats = {
+    projects: data.projects.length,
+    technologies: new Set(data.skills.flatMap((g) => g.items)).size,
+    roles: data.experiences.length,
+    moments: data.moments.length,
+  };
   return (
-    <main id="top" className="relative">
+    <main id="top" className="relative pb-24">
       <Toaster theme="dark" position="bottom-right" />
       <Nav about={data.about} />
-      <Hero about={data.about} />
+      <Hero about={data.about} stats={stats} />
       <About about={data.about} />
       <Projects projects={data.projects} />
       <Experience items={data.experiences} />
       <Moments items={data.moments} />
       <Skills groups={data.skills} />
       <Contact about={data.about} />
+      <BottomDock />
     </main>
   );
 }
+

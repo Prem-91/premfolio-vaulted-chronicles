@@ -27,8 +27,10 @@ export function Moments({ items }: { items: Moment[] }) {
           </span>
         </div>
 
-        {/* Honeycomb grid */}
-        <div className="honeycomb mt-12">
+        {/* Honeycomb grid — scrollable */}
+        <div className="moments-scroll mt-12 max-h-[62vh] overflow-y-auto overflow-x-hidden px-1 pb-16 pt-2 sm:max-h-[70vh]">
+        <div className="honeycomb">
+
           {items.map((m, i) => (
             <div key={m.id} className="hex-cell">
             <motion.button
