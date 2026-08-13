@@ -282,12 +282,32 @@
   }
 
   /* ---------- Honeycomb gallery ---------- */
+  .moments-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--cyan) transparent;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+  }
+  .moments-scroll::-webkit-scrollbar { width: 8px; }
+  .moments-scroll::-webkit-scrollbar-track {
+    background: color-mix(in oklab, white 4%, transparent);
+    border-radius: 999px;
+  }
+  .moments-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--cyan) 55%, transparent);
+    border-radius: 999px;
+  }
+  .moments-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--cyan);
+  }
+
   .honeycomb {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px 6px;
   }
+
   .hex {
     width: 132px;
     height: 152px;

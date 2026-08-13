@@ -67,7 +67,9 @@ export function Moments({ items }: { items: Moment[] }) {
             </div>
           ))}
         </div>
+        </div>
       </div>
+
 
       <AnimatePresence>
         {lightbox && (
