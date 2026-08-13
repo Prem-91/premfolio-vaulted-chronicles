@@ -34,13 +34,14 @@ export function Nav({ about }: { about: About | null }) {
           {initials}
           <span className="text-cyan">.</span>
         </a>
-        <nav className="hidden gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground md:flex">
+        <nav className="hidden gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground lg:flex">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} className="transition hover:text-cyan">
               {l.label}
             </a>
           ))}
         </nav>
+
         <a
           href={resumeUrl}
           download
