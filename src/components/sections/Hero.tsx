@@ -5,20 +5,28 @@ import { Starfield } from "@/components/Starfield";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
 
-const STATS = [
-  { big: "10+", label: "projects shipped" },
-  { big: "AI", label: "+ realtime systems" },
-  { big: "∞", label: "hackathon builds" },
-  { big: "FS", label: "full-stack depth" },
-];
+export type HeroStats = {
+  projects: number;
+  technologies: number;
+  roles: number;
+  moments: number;
+};
 
-export function Hero({ about }: { about: About | null }) {
+export function Hero({ about, stats }: { about: About | null; stats: HeroStats }) {
   const name = about?.name ?? PROFILE.name;
   const tagline = about?.tagline ?? PROFILE.tagline;
   const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
   const github = about?.github_url ?? PROFILE.github;
   const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
   const parts = name.split(" ");
+
+  const STATS = [
+    { big: String(stats.projects), label: "projects built" },
+    { big: String(stats.technologies), label: "technologies used" },
+    { big: String(stats.roles), label: "roles & programs" },
+    { big: String(stats.moments), label: "moments captured" },
+  ];
+
 
   const phrases = [
     tagline,
