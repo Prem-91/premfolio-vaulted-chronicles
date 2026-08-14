@@ -21,10 +21,10 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
   const parts = name.split(" ");
 
   const STATS = [
-    { big: String(stats.projects), label: "projects built" },
-    { big: String(stats.technologies), label: "technologies used" },
-    { big: String(stats.roles), label: "roles & programs" },
-    { big: String(stats.moments), label: "moments captured" },
+    { big: `${stats.projects}+`, label: "projects built" },
+    { big: `${stats.technologies}+`, label: "technologies used" },
+    { big: `${stats.roles}+`, label: "roles & programs" },
+    { big: `${stats.moments}+`, label: "moments captured" },
   ];
 
 
@@ -66,7 +66,7 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
           className="inline-flex max-w-full items-center gap-2 rounded-full border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.25em] text-cyan backdrop-blur sm:text-[10px] sm:tracking-[0.3em]"
         >
           <Sparkles className="h-3 w-3 shrink-0" />
-          Available for work · Engineering portfolio
+          Open to collaborations · Engineering portfolio
         </motion.div>
 
         <motion.h1
