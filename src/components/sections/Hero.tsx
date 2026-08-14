@@ -21,10 +21,10 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
   const parts = name.split(" ");
 
   const STATS = [
-    { big: String(stats.projects), label: "projects built" },
-    { big: String(stats.technologies), label: "technologies used" },
-    { big: String(stats.roles), label: "roles & programs" },
-    { big: String(stats.moments), label: "moments captured" },
+    { big: `${stats.projects}+`, label: "projects built" },
+    { big: `${stats.technologies}+`, label: "technologies used" },
+    { big: `${stats.roles}+`, label: "roles & programs" },
+    { big: `${stats.moments}+`, label: "moments captured" },
   ];
 
 
