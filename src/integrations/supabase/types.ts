@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      achievements: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          org: string | null
+          period: string | null
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          org?: string | null
+          period?: string | null
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          org?: string | null
+          period?: string | null
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
       admin_emails: {
         Row: {
           created_at: string
@@ -110,28 +140,34 @@ export type Database = {
       moments: {
         Row: {
           caption: string | null
+          category: string | null
           created_at: string
           event_date: string | null
           id: string
           image_path: string
+          location: string | null
           sort_order: number
           title: string
         }
         Insert: {
           caption?: string | null
+          category?: string | null
           created_at?: string
           event_date?: string | null
           id?: string
           image_path: string
+          location?: string | null
           sort_order?: number
           title: string
         }
         Update: {
           caption?: string | null
+          category?: string | null
           created_at?: string
           event_date?: string | null
           id?: string
           image_path?: string
+          location?: string | null
           sort_order?: number
           title?: string
         }
@@ -140,41 +176,59 @@ export type Database = {
       projects: {
         Row: {
           categories: string[]
+          challenges: string | null
           created_at: string
           description: string
           featured: boolean
+          features: string[]
           github_url: string | null
           id: string
+          learning: string | null
           live_url: string | null
           name: string
+          problem: string | null
+          solution: string | null
           sort_order: number
           stack: string[]
+          status: string
           year: string | null
         }
         Insert: {
           categories?: string[]
+          challenges?: string | null
           created_at?: string
           description: string
           featured?: boolean
+          features?: string[]
           github_url?: string | null
           id?: string
+          learning?: string | null
           live_url?: string | null
           name: string
+          problem?: string | null
+          solution?: string | null
           sort_order?: number
           stack?: string[]
+          status?: string
           year?: string | null
         }
         Update: {
           categories?: string[]
+          challenges?: string | null
           created_at?: string
           description?: string
           featured?: boolean
+          features?: string[]
           github_url?: string | null
           id?: string
+          learning?: string | null
           live_url?: string | null
           name?: string
+          problem?: string | null
+          solution?: string | null
           sort_order?: number
           stack?: string[]
+          status?: string
           year?: string | null
         }
         Relationships: []
