@@ -31,6 +31,12 @@ export type Project = {
   year: string | null;
   featured: boolean;
   sort_order: number;
+  problem: string | null;
+  solution: string | null;
+  features: string[];
+  challenges: string | null;
+  learning: string | null;
+  status: string;
 };
 export type Experience = {
   id: string;
@@ -50,13 +56,23 @@ export type Moment = {
   image_path: string;
   url: string | null;
   sort_order: number;
+  category: string | null;
+  location: string | null;
+};
+export type Achievement = {
+  id: string;
+  title: string;
+  org: string | null;
+  period: string | null;
+  detail: string | null;
+  sort_order: number;
 };
 
 // ---------- PUBLIC FETCH ----------
 export const getPortfolio = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [aboutQ, projectsQ, expQ, skillsQ, momentsQ] = await Promise.all([
+  const [aboutQ, projectsQ, expQ, skillsQ, momentsQ, achievementsQ] = await Promise.all([
     supabaseAdmin.from("about_profile").select("*").limit(1).maybeSingle(),
     supabaseAdmin.from("projects").select("*").order("sort_order", { ascending: true }),
     supabaseAdmin.from("experiences").select("*").order("sort_order", { ascending: true }),
@@ -66,6 +82,7 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
       .select("*")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false }),
+    supabaseAdmin.from("achievements").select("*").order("sort_order", { ascending: true }),
   ]);
 
   const moments: Moment[] = await Promise.all(
@@ -91,6 +108,7 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
     projects: (projectsQ.data ?? []) as Project[],
     experiences: (expQ.data ?? []) as Experience[],
     skills: (skillsQ.data ?? []) as SkillsGroup[],
+    achievements: (achievementsQ.data ?? []) as Achievement[],
     moments,
   };
 });
@@ -190,6 +208,12 @@ const projectInput = z.object({
   year: z.string().max(20).nullable().optional(),
   featured: z.boolean().optional(),
   sort_order: z.number().int().optional(),
+  problem: z.string().max(2000).nullable().optional(),
+  solution: z.string().max(2000).nullable().optional(),
+  features: z.array(z.string().min(1).max(200)).max(20).optional(),
+  challenges: z.string().max(2000).nullable().optional(),
+  learning: z.string().max(2000).nullable().optional(),
+  status: z.enum(["shipped", "building", "concept"]).optional(),
 });
 
 export const upsertProject = createServerFn({ method: "POST" })
@@ -205,6 +229,12 @@ export const upsertProject = createServerFn({ method: "POST" })
       year: data.year || null,
       featured: data.featured ?? false,
       sort_order: data.sort_order ?? 999,
+      problem: data.problem || null,
+      solution: data.solution || null,
+      features: data.features ?? [],
+      challenges: data.challenges || null,
+      learning: data.learning || null,
+      status: data.status ?? "shipped",
     };
     const { error } = data.id
       ? await supabase.from("projects").update(payload).eq("id", data.id)
@@ -297,6 +327,8 @@ const momentInput = z.object({
   content_type: z.string().regex(/^image\//),
   filename: z.string().min(1).max(200),
   sort_order: z.number().int().optional(),
+  category: z.string().max(60).nullable().optional(),
+  location: z.string().max(120).nullable().optional(),
 });
 
 export const createMoment = createServerFn({ method: "POST" })
@@ -318,6 +350,8 @@ export const createMoment = createServerFn({ method: "POST" })
       caption: data.caption || null,
       image_path: path,
       sort_order: data.sort_order ?? 999,
+      category: data.category || null,
+      location: data.location || null,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -336,6 +370,45 @@ export const deleteMoment = createServerFn({ method: "POST" })
       .single();
     if (row?.image_path) await supabaseAdmin.storage.from(BUCKET).remove([row.image_path]);
     const { error } = await supabaseAdmin.from("moments").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// ---------- ACHIEVEMENTS ----------
+const achievementInput = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().min(1).max(200),
+  org: z.string().max(160).nullable().optional(),
+  period: z.string().max(80).nullable().optional(),
+  detail: z.string().max(1000).nullable().optional(),
+  sort_order: z.number().int().optional(),
+});
+
+export const upsertAchievement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof achievementInput>) => achievementInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const payload = {
+      ...data,
+      org: data.org || null,
+      period: data.period || null,
+      detail: data.detail || null,
+      sort_order: data.sort_order ?? 999,
+    };
+    const { error } = data.id
+      ? await context.supabase.from("achievements").update(payload).eq("id", data.id)
+      : await context.supabase.from("achievements").insert(payload);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const deleteAchievement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const { error } = await context.supabase.from("achievements").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

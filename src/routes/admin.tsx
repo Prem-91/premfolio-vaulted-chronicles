@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Code2,
   Camera,
+  Trophy,
   Lock,
   ExternalLink,
 } from "lucide-react";
@@ -31,6 +32,9 @@ import {
   deleteSkillGroup,
   createMoment,
   deleteMoment,
+  upsertAchievement,
+  deleteAchievement,
+  type Achievement,
   checkIsAdmin,
   type About,
   type Project,
@@ -218,7 +222,7 @@ function NotAuthorized({ email }: { email?: string }) {
 
 // ---------------- DASHBOARD ----------------
 
-type Tab = "about" | "projects" | "experiences" | "skills" | "moments";
+type Tab = "about" | "projects" | "experiences" | "achievements" | "skills" | "moments";
 
 function Dashboard({ email }: { email?: string }) {
   const [tab, setTab] = useState<Tab>("about");
@@ -245,6 +249,12 @@ function Dashboard({ email }: { email?: string }) {
     { id: "about", label: "About", icon: User },
     { id: "projects", label: "Work", icon: Briefcase, count: data?.projects.length },
     { id: "experiences", label: "Journey", icon: GraduationCap, count: data?.experiences.length },
+    {
+      id: "achievements",
+      label: "Achievements",
+      icon: Trophy,
+      count: data?.achievements.length,
+    },
     { id: "skills", label: "Stack", icon: Code2, count: data?.skills.length },
     { id: "moments", label: "Moments", icon: Camera, count: data?.moments.length },
   ];
@@ -304,6 +314,8 @@ function Dashboard({ email }: { email?: string }) {
           <ProjectsEditor items={data.projects} onChanged={refresh} />
         ) : tab === "experiences" ? (
           <ExperienceEditor items={data.experiences} onChanged={refresh} />
+        ) : tab === "achievements" ? (
+          <AchievementsEditor items={data.achievements} onChanged={refresh} />
         ) : tab === "skills" ? (
           <SkillsEditor items={data.skills} onChanged={refresh} />
         ) : (
@@ -469,6 +481,12 @@ const emptyProject: Omit<Project, "id"> & { id?: string } = {
   year: "",
   featured: false,
   sort_order: 999,
+  problem: null,
+  solution: null,
+  features: [],
+  challenges: null,
+  learning: null,
+  status: "shipped",
 };
 
 function ProjectsEditor({ items, onChanged }: { items: Project[]; onChanged: () => void }) {
@@ -559,6 +577,7 @@ function ProjectForm({
   const [form, setForm] = useState(initial);
   const [stackText, setStackText] = useState(initial.stack.join(", "));
   const [catsText, setCatsText] = useState(initial.categories.join(", "));
+  const [featuresText, setFeaturesText] = useState((initial.features ?? []).join("\n"));
   const [busy, setBusy] = useState(false);
 
   const save = async () => {
@@ -569,6 +588,13 @@ function ProjectForm({
           ...form,
           stack: stackText.split(",").map((s) => s.trim()).filter(Boolean),
           categories: catsText.split(",").map((s) => s.trim()).filter(Boolean),
+          features: featuresText
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          status: (form.status === "building" || form.status === "concept"
+            ? form.status
+            : "shipped") as "shipped" | "building" | "concept",
         },
       });
       toast.success("Saved.");
@@ -630,6 +656,67 @@ function ProjectForm({
           />
         </label>
       </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className={labelCls}>Problem</span>
+          <textarea
+            rows={3}
+            value={form.problem ?? ""}
+            onChange={(e) => setForm({ ...form, problem: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+        <label className="block">
+          <span className={labelCls}>Solution</span>
+          <textarea
+            rows={3}
+            value={form.solution ?? ""}
+            onChange={(e) => setForm({ ...form, solution: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+      </div>
+      <label className="block">
+        <span className={labelCls}>Key features (one per line)</span>
+        <textarea
+          rows={4}
+          value={featuresText}
+          onChange={(e) => setFeaturesText(e.target.value)}
+          className={inputCls}
+        />
+      </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className={labelCls}>Challenges</span>
+          <textarea
+            rows={3}
+            value={form.challenges ?? ""}
+            onChange={(e) => setForm({ ...form, challenges: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+        <label className="block">
+          <span className={labelCls}>What I learned</span>
+          <textarea
+            rows={3}
+            value={form.learning ?? ""}
+            onChange={(e) => setForm({ ...form, learning: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+      </div>
+      <label className="block sm:w-56">
+        <span className={labelCls}>Status</span>
+        <select
+          value={form.status}
+          onChange={(e) => setForm({ ...form, status: e.target.value })}
+          className={inputCls}
+        >
+          <option value="shipped">shipped</option>
+          <option value="building">currently building</option>
+          <option value="concept">concept</option>
+        </select>
+      </label>
       <div className="flex items-center gap-4">
         <label className="inline-flex items-center gap-2 text-sm">
           <input
@@ -963,6 +1050,174 @@ function SkillForm({
   );
 }
 
+// ---------------- ACHIEVEMENTS ----------------
+
+const emptyAchievement: Omit<Achievement, "id"> & { id?: string } = {
+  title: "",
+  org: "",
+  period: "",
+  detail: "",
+  sort_order: 999,
+};
+
+function AchievementsEditor({
+  items,
+  onChanged,
+}: {
+  items: Achievement[];
+  onChanged: () => void;
+}) {
+  const [editing, setEditing] = useState<(Omit<Achievement, "id"> & { id?: string }) | null>(null);
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this achievement?")) return;
+    try {
+      await deleteAchievement({ data: { id } });
+      toast.success("Deleted.");
+      onChanged();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Delete failed");
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-5 flex justify-end">
+        <AddButton onClick={() => setEditing({ ...emptyAchievement })} label="Add achievement" />
+      </div>
+      <div className="space-y-3">
+        {items.map((it) => (
+          <div key={it.id} className={cardCls}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-cyan">
+                  {it.period ?? "—"}
+                </p>
+                <h3 className="mt-1 font-display text-lg font-semibold">{it.title}</h3>
+                <p className="text-sm text-muted-foreground">{it.org}</p>
+                {it.detail && <p className="mt-2 text-sm text-foreground/80">{it.detail}</p>}
+              </div>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setEditing(it)}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => remove(it.id)}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Modal open={!!editing} onClose={() => setEditing(null)}>
+        {editing && (
+          <AchievementForm
+            initial={editing}
+            onCancel={() => setEditing(null)}
+            onSaved={() => {
+              setEditing(null);
+              onChanged();
+            }}
+          />
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+function AchievementForm({
+  initial,
+  onCancel,
+  onSaved,
+}: {
+  initial: Omit<Achievement, "id"> & { id?: string };
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState(initial);
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      await upsertAchievement({ data: form });
+      toast.success("Saved.");
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="font-display text-2xl font-bold">
+        {form.id ? "Edit achievement" : "Add achievement"}
+      </h2>
+      <label className="block">
+        <span className={labelCls}>Title</span>
+        <input
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className={inputCls}
+        />
+      </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className={labelCls}>Organisation</span>
+          <input
+            value={form.org ?? ""}
+            onChange={(e) => setForm({ ...form, org: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+        <label className="block">
+          <span className={labelCls}>Period</span>
+          <input
+            value={form.period ?? ""}
+            onChange={(e) => setForm({ ...form, period: e.target.value || null })}
+            className={inputCls}
+          />
+        </label>
+      </div>
+      <label className="block">
+        <span className={labelCls}>Detail</span>
+        <textarea
+          rows={3}
+          value={form.detail ?? ""}
+          onChange={(e) => setForm({ ...form, detail: e.target.value || null })}
+          className={inputCls}
+        />
+      </label>
+      <label className="inline-flex items-center gap-2 text-sm">
+        <span className={labelCls}>Order</span>
+        <input
+          type="number"
+          value={form.sort_order}
+          onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
+          className="w-20 rounded-lg border border-border bg-background/40 px-2 py-1 text-sm outline-none focus:border-cyan"
+        />
+      </label>
+      <div className="flex justify-end gap-2 pt-2">
+        <button onClick={onCancel} className={btnGhost}>
+          Cancel
+        </button>
+        <button onClick={save} disabled={busy} className={btnPrimary}>
+          <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ---------------- MOMENTS ----------------
 
 function MomentsEditor({ items, onChanged }: { items: Moment[]; onChanged: () => void }) {
@@ -1034,6 +1289,8 @@ function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [caption, setCaption] = useState("");
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
   const [busy, setBusy] = useState(false);
 
   const onDrop = useCallback((acc: File[]) => {
@@ -1069,6 +1326,8 @@ function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
           image_base64: btoa(bin),
           content_type: file.type || "image/jpeg",
           filename: file.name,
+          category: category.trim() || null,
+          location: location.trim() || null,
         },
       });
       toast.success("Saved.");

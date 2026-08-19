@@ -1,5 +1,14 @@
 import { motion } from "framer-motion";
-import { ArrowDown, Download, ArrowRight, Github, Linkedin, Sparkles } from "lucide-react";
+import {
+  ArrowDown,
+  Download,
+  ArrowRight,
+  Github,
+  Linkedin,
+  Sparkles,
+  MapPin,
+  GraduationCap,
+} from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
 import { Starfield } from "@/components/Starfield";
 import type { About } from "@/lib/content.functions";
@@ -18,13 +27,15 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
   const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
   const github = about?.github_url ?? PROFILE.github;
   const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
+  const location = about?.location ?? PROFILE.location;
+  const focus = about?.current_focus ?? "Building RoadFix AI";
   const parts = name.split(" ");
 
   const STATS = [
-    { big: `${stats.projects}+`, label: "projects built" },
-    { big: `${stats.technologies}+`, label: "technologies used" },
-    { big: `${stats.roles}+`, label: "roles & programs" },
-    { big: `${stats.moments}+`, label: "moments captured" },
+    { big: "3+", label: "featured builds" },
+    { big: "150+", label: "students reached" },
+    { big: "8.41+", label: "academic performance" },
+    { big: "5+", label: "developer community experiences" },
   ];
 
 
@@ -97,12 +108,39 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
           transition={{ delay: 0.5 }}
           className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:text-xs"
         >
-          Full-stack · Backend · Cloud &amp; AI
+          AI &amp; Full-Stack Developer · Computer Engineering Student @ SPPU
         </motion.p>
 
         <div className="mx-auto mt-6 min-h-[3.5rem] max-w-3xl font-display text-xl text-cyan sm:text-3xl">
           <Typewriter text={phrases} startDelay={800} loop speed={55} />
         </div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+        >
+          I build AI-powered applications, full-stack systems, and practical digital solutions that
+          solve real-world problems.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          className="mt-6 flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+        >
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
+            <MapPin className="h-3 w-3 text-cyan" /> {location}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
+            <GraduationCap className="h-3 w-3 text-cyan" /> TSSM&apos;s BSCOER · SPPU
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan" /> {focus}
+          </span>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -131,10 +169,10 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
             href={github}
             target="_blank"
             rel="noreferrer noopener"
-            aria-label="GitHub"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan sm:px-6"
           >
             <Github className="h-4 w-4" />
+            GitHub
           </a>
           <a
             href={linkedin}
