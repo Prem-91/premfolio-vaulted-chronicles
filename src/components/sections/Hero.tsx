@@ -181,15 +181,6 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
             aria-label="LinkedIn"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
           >
-            <Github className="h-4 w-4" />
-          </a>
-          <a
-            href={linkedin}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label="LinkedIn"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
-          >
             <Linkedin className="h-4 w-4" />
           </a>
         </motion.div>
