@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Github, ExternalLink, Star } from "lucide-react";
+import { Github, ExternalLink, Star, FileText } from "lucide-react";
 import type { Project } from "@/lib/content.functions";
 import { ALL_CATEGORIES } from "@/lib/profile";
+import { CaseStudyModal, hasCaseStudy } from "./CaseStudyModal";
 
 const FILTERS = ["All", ...ALL_CATEGORIES] as const;
 
 export function Projects({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
+  const [caseStudy, setCaseStudy] = useState<Project | null>(null);
 
   const filtered = useMemo(
     () => (filter === "All" ? projects : projects.filter((p) => p.categories.includes(filter))),
@@ -15,13 +17,13 @@ export function Projects({ projects }: { projects: Project[] }) {
   );
 
   return (
-    <section id="projects" className="relative w-full py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section id="projects" className="relative w-full py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-cyan">/ work</p>
-            <h2 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-6xl">
-              Selected <span className="text-cyan">projects</span>
+            <h2 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-6xl">
+              Featured <span className="text-cyan">builds</span>
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -74,8 +76,13 @@ export function Projects({ projects }: { projects: Project[] }) {
                       "radial-gradient(circle, color-mix(in oklab, var(--cyan) 50%, transparent), transparent 70%)",
                   }}
                 />
-                <div className="relative flex items-center justify-between font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                  <span>{p.year}</span>
+                <div className="relative flex items-center justify-between gap-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    {p.year && <span>{p.year}</span>}
+                    <span className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[10px]">
+                      {p.status}
+                    </span>
+                  </span>
                   {p.featured && (
                     <span className="inline-flex items-center gap-1 text-cyan">
                       <Star className="h-3 w-3" /> featured
@@ -83,7 +90,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                   )}
                 </div>
 
-                <h3 className="relative mt-4 font-display text-3xl font-bold tracking-tight transition-colors duration-300 group-hover:text-cyan sm:text-4xl">
+                <h3 className="relative mt-4 font-display text-2xl font-bold tracking-tight transition-colors duration-300 group-hover:text-cyan sm:text-4xl">
                   {p.name}
                 </h3>
                 <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -101,7 +108,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                   ))}
                 </div>
 
-                <div className="relative mt-auto flex flex-wrap gap-3 pt-6">
+                <div className="relative mt-auto flex flex-wrap items-center gap-4 pt-6">
                   {p.github_url && (
                     <a
                       href={p.github_url}
@@ -122,12 +129,27 @@ export function Projects({ projects }: { projects: Project[] }) {
                       <ExternalLink className="h-3.5 w-3.5" /> live demo
                     </a>
                   )}
+                  {hasCaseStudy(p) && (
+                    <button
+                      type="button"
+                      onClick={() => setCaseStudy(p)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-cyan transition hover:bg-cyan/20"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> case study
+                    </button>
+                  )}
                 </div>
               </motion.article>
             ))}
           </AnimatePresence>
         </div>
       </div>
+
+      <AnimatePresence>
+        {caseStudy && (
+          <CaseStudyModal project={caseStudy} onClose={() => setCaseStudy(null)} />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
