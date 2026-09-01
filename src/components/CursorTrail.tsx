@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 
+/** Blueprint crosshair that tracks the pointer — drafting-table feel. */
 export function CursorTrail() {
-  const ref = useRef<HTMLDivElement>(null);
-  const target = useRef({ x: -100, y: -100 });
-  const pos = useRef({ x: -100, y: -100 });
+  const vRef = useRef<HTMLDivElement>(null);
+  const hRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const target = useRef({ x: -200, y: -200 });
+  const pos = useRef({ x: -200, y: -200 });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -17,11 +20,13 @@ export function CursorTrail() {
 
     let raf = 0;
     const loop = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.18;
-      pos.current.y += (target.current.y - pos.current.y) * 0.18;
-      if (ref.current) {
-        ref.current.style.transform = `translate3d(${pos.current.x - 16}px, ${pos.current.y - 16}px, 0)`;
-      }
+      pos.current.x += (target.current.x - pos.current.x) * 0.22;
+      pos.current.y += (target.current.y - pos.current.y) * 0.22;
+      const { x, y } = pos.current;
+      if (vRef.current) vRef.current.style.transform = `translate3d(${x}px, 0, 0)`;
+      if (hRef.current) hRef.current.style.transform = `translate3d(0, ${y}px, 0)`;
+      if (dotRef.current)
+        dotRef.current.style.transform = `translate3d(${x - 4}px, ${y - 4}px, 0)`;
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -33,15 +38,21 @@ export function CursorTrail() {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[60] h-8 w-8 rounded-full mix-blend-screen will-change-transform"
-      style={{
-        background:
-          "radial-gradient(circle, color-mix(in oklab, var(--cyan) 60%, transparent) 0%, transparent 70%)",
-        filter: "blur(2px)",
-      }}
-    />
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[60] hidden lg:block">
+      <div
+        ref={vRef}
+        className="absolute left-0 top-0 h-full w-px will-change-transform"
+        style={{ background: "color-mix(in oklab, var(--cyan) 22%, transparent)" }}
+      />
+      <div
+        ref={hRef}
+        className="absolute left-0 top-0 h-px w-full will-change-transform"
+        style={{ background: "color-mix(in oklab, var(--cyan) 22%, transparent)" }}
+      />
+      <div
+        ref={dotRef}
+        className="absolute left-0 top-0 h-2 w-2 border border-cyan/60 will-change-transform"
+      />
+    </div>
   );
 }
