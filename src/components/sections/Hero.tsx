@@ -1,16 +1,6 @@
 import { motion } from "framer-motion";
-import {
-  ArrowDown,
-  Download,
-  ArrowRight,
-  Github,
-  Linkedin,
-  Sparkles,
-  MapPin,
-  GraduationCap,
-} from "lucide-react";
+import { ArrowDown, ArrowUpRight, Github, Linkedin, Download } from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
-import { Starfield } from "@/components/Starfield";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
 
@@ -21,7 +11,37 @@ export type HeroStats = {
   moments: number;
 };
 
-export function Hero({ about, stats }: { about: About | null; stats: HeroStats }) {
+const STATS = [
+  { big: "3+", label: "featured builds" },
+  { big: "150+", label: "students reached" },
+  { big: "8.41+", label: "academic performance" },
+  { big: "5+", label: "community experiences" },
+];
+
+const TICKER = [
+  "Python",
+  "TypeScript",
+  "React",
+  "Node.js",
+  "FastAPI",
+  "PostgreSQL",
+  "Docker",
+  "Kubernetes",
+  "GitOps",
+  "LLM Apps",
+  "AWS",
+  "Tailwind",
+];
+
+const line = {
+  hidden: { y: "110%" },
+  show: (i: number) => ({
+    y: "0%",
+    transition: { duration: 1, delay: 0.15 + i * 0.12, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+};
+
+export function Hero({ about }: { about: About | null; stats: HeroStats }) {
   const name = about?.name ?? PROFILE.name;
   const tagline = about?.tagline ?? PROFILE.tagline;
   const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
@@ -31,190 +51,175 @@ export function Hero({ about, stats }: { about: About | null; stats: HeroStats }
   const focus = about?.current_focus ?? "Building RoadFix AI";
   const parts = name.split(" ");
 
-  const STATS = [
-    { big: "3+", label: "featured builds" },
-    { big: "150+", label: "students reached" },
-    { big: "8.41+", label: "academic performance" },
-    { big: "5+", label: "developer community experiences" },
-  ];
-
-
   const phrases = [
     tagline,
-    "Building backend systems",
-    "Shipping full-stack products",
-    "Exploring AI & cloud",
+    "Building AI-powered applications",
+    "Shipping full-stack systems",
+    "Exploring cloud & developer tooling",
   ].filter(Boolean);
 
   return (
-    <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden scanlines">
-      {/* Layered ambient backdrop */}
-      <div className="aurora" />
-      <div className="grid-bg pointer-events-none absolute inset-0" />
-      <Starfield />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(60% 50% at 50% 8%, color-mix(in oklab, oklch(0.6 0.18 285) 18%, transparent), transparent 70%)",
-        }}
-      />
-      <div className="beam pointer-events-none absolute inset-x-0 top-0 h-[60vh]" />
-      {/* Vignette */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, oklch(0.08 0.01 250 / 0.75) 100%)",
-        }}
-      />
+    <>
+      <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
+        <div className="blueprint pointer-events-none absolute inset-0 opacity-70" />
+        <div className="aurora" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 55% at 50% 45%, transparent 35%, oklch(0.985 0 0 / 0.85) 100%)",
+          }}
+        />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 py-24 text-center sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="inline-flex max-w-full items-center gap-2 rounded-full border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.25em] text-cyan backdrop-blur sm:text-[10px] sm:tracking-[0.3em]"
-        >
-          <Sparkles className="h-3 w-3 shrink-0" />
-          Open to collaborations · Engineering portfolio
-        </motion.div>
+        <div className="rails relative z-10 mx-auto w-full max-w-[1400px] px-5 pb-16 pt-28 sm:px-10">
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="h-px w-full origin-left bg-border"
+          />
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.8 }}
-          className="mx-auto mt-6 max-w-5xl font-display text-[clamp(2.6rem,11vw,7rem)] font-bold leading-[0.95] tracking-tighter"
-        >
-          <span className="text-foreground">{parts[0]}</span>{" "}
-          <span
-            className="inline-block"
-            style={{
-              backgroundImage:
-                "linear-gradient(100deg, var(--cyan) 0%, oklch(0.8 0.13 210) 45%, oklch(0.65 0.18 285) 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              color: "transparent",
-            }}
+          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+            <p className="label">01. portfolio / {new Date().getFullYear()}</p>
+            <p className="label">{location}</p>
+          </div>
+
+          <h1 className="display-thin mt-8 text-[clamp(2.6rem,11vw,8.5rem)]">
+            <span className="block overflow-hidden">
+              <motion.span
+                className="block"
+                variants={line}
+                custom={0}
+                initial="hidden"
+                animate="show"
+              >
+                {parts[0]}
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden">
+              <motion.span
+                className="block text-muted-foreground"
+                variants={line}
+                custom={1}
+                initial="hidden"
+                animate="show"
+              >
+                {parts.slice(1).join(" ")}
+              </motion.span>
+            </span>
+          </h1>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="mt-10 grid gap-8 border-t border-border pt-8 lg:grid-cols-[1.1fr_1fr]"
           >
-            {parts.slice(1).join(" ")}
-          </span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:text-xs"
-        >
-          AI &amp; Full-Stack Developer · Computer Engineering Student @ SPPU
-        </motion.p>
-
-        <div className="mx-auto mt-6 min-h-[3.5rem] max-w-3xl font-display text-xl text-cyan sm:text-3xl">
-          <Typewriter text={phrases} startDelay={800} loop speed={55} />
-        </div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
-        >
-          I build AI-powered applications, full-stack systems, and practical digital solutions that
-          solve real-world problems.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
-          className="mt-6 flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-        >
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
-            <MapPin className="h-3 w-3 text-cyan" /> {location}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
-            <GraduationCap className="h-3 w-3 text-cyan" /> TSSM&apos;s BSCOER · SPPU
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1.5">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan" /> {focus}
-          </span>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="mt-9 flex flex-wrap items-center justify-center gap-3"
-        >
-          <a
-            href="#projects"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-cyan px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:glow-cyan sm:px-6"
-          >
-            <span className="relative z-10">View Work</span>
-            <ArrowRight className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-          </a>
-          <a
-            href={resumeUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan sm:px-6"
-          >
-            <Download className="h-4 w-4" />
-            Resume
-          </a>
-          <a
-            href={github}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:border-cyan/50 hover:text-cyan sm:px-6"
-          >
-            <Github className="h-4 w-4" />
-            GitHub
-          </a>
-          <a
-            href={linkedin}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label="LinkedIn"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white/5 text-muted-foreground transition hover:border-cyan/50 hover:text-cyan"
-          >
-            <Linkedin className="h-4 w-4" />
-          </a>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
-          className="mx-auto mt-14 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
-        >
-          {STATS.map((s) => (
-            <div
-              key={s.label}
-              className="border-gradient rounded-2xl border border-border glass px-3 py-5 transition hover:glow-cyan"
-            >
-              <div className="font-display text-2xl font-bold text-cyan sm:text-3xl">{s.big}</div>
-              <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-muted-foreground sm:text-[10px]">
-                {s.label}
+            <div>
+              <p className="label">
+                AI &amp; Full-Stack Developer — Computer Engineering Student @ SPPU
+              </p>
+              <div className="mt-5 min-h-[3.2rem] font-display text-[clamp(1.1rem,3.4vw,1.9rem)] font-light tracking-wide text-foreground">
+                <Typewriter text={phrases} startDelay={900} loop speed={55} />
               </div>
             </div>
-          ))}
-        </motion.div>
-      </div>
 
-      <motion.a
-        href="#about"
-        aria-label="Scroll"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 animate-float text-cyan"
-      >
-        <ArrowDown className="h-5 w-5" />
-      </motion.a>
-    </section>
+            <div className="lg:border-l lg:border-border lg:pl-8">
+              <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+                I build AI-powered applications, full-stack systems, and practical digital solutions
+                that solve real-world problems.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <a
+                  href="#projects"
+                  className="group inline-flex items-center gap-2 bg-ink px-6 py-3.5 font-mono text-[10px] uppercase tracking-[0.28em] text-background"
+                >
+                  View work
+                  <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-2 border border-foreground/25 px-6 py-3.5 font-mono text-[10px] uppercase tracking-[0.28em] transition hover:bg-ink hover:text-background"
+                >
+                  <Download className="h-3.5 w-3.5" /> Resume
+                </a>
+                <a
+                  href={github}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label="GitHub"
+                  className="inline-flex h-12 w-12 items-center justify-center border border-foreground/25 transition hover:bg-ink hover:text-background"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+                <a
+                  href={linkedin}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label="LinkedIn"
+                  className="inline-flex h-12 w-12 items-center justify-center border border-foreground/25 transition hover:bg-ink hover:text-background"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <span>TSSM&apos;s BSCOER · SPPU</span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-1 w-1 animate-pulse bg-cyan" /> {focus}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.7 }}
+            className="mt-12 grid grid-cols-2 border-t border-border sm:grid-cols-4"
+          >
+            {STATS.map((s, i) => (
+              <div
+                key={s.label}
+                className={`border-b border-border px-4 py-6 sm:border-b-0 ${
+                  i > 0 ? "sm:border-l" : ""
+                } ${i % 2 === 1 ? "border-l" : ""}`}
+              >
+                <div className="display-thin text-3xl sm:text-4xl">{s.big}</div>
+                <div className="label mt-3">{s.label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        <a
+          href="#about"
+          aria-label="Scroll to about"
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 animate-float text-muted-foreground"
+        >
+          <ArrowDown className="h-4 w-4" />
+        </a>
+      </section>
+
+      <div className="overflow-hidden border-y border-border bg-ink py-3">
+        <div className="marquee-track">
+          {[0, 1].map((k) => (
+            <span key={k} className="flex shrink-0 items-center">
+              {TICKER.map((t) => (
+                <span
+                  key={`${k}-${t}`}
+                  className="mx-6 font-mono text-[10px] uppercase tracking-[0.3em] text-background/70"
+                >
+                  {t} <span className="ml-6 text-background/30">/</span>
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
