@@ -1,11 +1,19 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Github, ExternalLink, Star, FileText } from "lucide-react";
+import { Github, ExternalLink, FileText } from "lucide-react";
 import type { Project } from "@/lib/content.functions";
 import { ALL_CATEGORIES } from "@/lib/profile";
 import { CaseStudyModal, hasCaseStudy } from "./CaseStudyModal";
+import { Section, Reveal, Card } from "@/components/Section";
 
 const FILTERS = ["All", ...ALL_CATEGORIES] as const;
+
+function spotlight(e: React.MouseEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  el.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
 
 export function Projects({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
@@ -17,139 +25,126 @@ export function Projects({ projects }: { projects: Project[] }) {
   );
 
   return (
-    <section id="projects" className="relative w-full py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-5 sm:px-6">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-cyan">/ work</p>
-            <h2 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-6xl">
-              Featured <span className="text-cyan">builds</span>
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
+    <>
+      <Section
+        id="projects"
+        index="04"
+        label="work"
+        title="Featured builds"
+        wide
+        aside={
+          <div className="flex flex-wrap gap-px">
             {FILTERS.map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition ${
+                className={`border px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition ${
                   filter === f
-                    ? "border-cyan bg-cyan/15 text-cyan"
-                    : "border-border bg-white/5 text-muted-foreground hover:border-cyan/40 hover:text-foreground"
+                    ? "border-ink bg-ink text-background"
+                    : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {f}
               </button>
             ))}
           </div>
-        </div>
-
-        <div className="mt-12 grid auto-rows-fr grid-cols-1 gap-5 md:grid-cols-6">
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((p, i) => (
-              <motion.article
+              <motion.div
                 layout
                 key={p.id}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                exit={{ opacity: 0, y: -8 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
-                onMouseMove={(e) => {
-                  const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                  (e.currentTarget as HTMLElement).style.setProperty(
-                    "--mx",
-                    `${e.clientX - r.left}px`,
-                  );
-                  (e.currentTarget as HTMLElement).style.setProperty(
-                    "--my",
-                    `${e.clientY - r.top}px`,
-                  );
-                }}
-                className={`group spotlight border-gradient relative flex flex-col overflow-hidden rounded-2xl border border-border glass p-6 transition hover:glow-cyan md:p-8 ${
-                  p.featured ? "md:col-span-4" : "md:col-span-3"
-                } ${i === 0 ? "md:col-span-4" : ""}`}
+                transition={{ duration: 0.55, delay: (i % 4) * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                className={p.featured || i === 0 ? "md:col-span-4" : "md:col-span-2"}
               >
-                <div
-                  className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full opacity-30 transition group-hover:opacity-60"
-                  style={{
-                    background:
-                      "radial-gradient(circle, color-mix(in oklab, var(--cyan) 50%, transparent), transparent 70%)",
-                  }}
-                />
-                <div className="relative flex items-center justify-between gap-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                  <span className="flex items-center gap-2">
-                    {p.year && <span>{p.year}</span>}
-                    <span className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[10px]">
+                <Card
+                  onMouseMove={spotlight}
+                  className="group flex h-full flex-col p-6 sm:p-8"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="label">
+                      {String(i + 1).padStart(2, "0")} {p.year ? `/ ${p.year}` : ""}
+                    </span>
+                    <span className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
                       {p.status}
                     </span>
-                  </span>
-                  {p.featured && (
-                    <span className="inline-flex items-center gap-1 text-cyan">
-                      <Star className="h-3 w-3" /> featured
-                    </span>
-                  )}
-                </div>
+                  </div>
 
-                <h3 className="relative mt-4 font-display text-2xl font-bold tracking-tight transition-colors duration-300 group-hover:text-cyan sm:text-4xl">
-                  {p.name}
-                </h3>
-                <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  {p.description}
-                </p>
+                  <h3 className="display-thin mt-6 text-[clamp(1.4rem,3.4vw,2.3rem)] transition-colors">
+                    {p.name}
+                  </h3>
+                  <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                    {p.description}
+                  </p>
 
-                <div className="relative mt-5 flex flex-wrap gap-1.5">
-                  {p.stack.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-md border border-border bg-white/5 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition group-hover:border-cyan/30 group-hover:text-foreground"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
+                  <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
+                    {p.stack.map((s) => (
+                      <span
+                        key={s}
+                        className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="relative mt-auto flex flex-wrap items-center gap-4 pt-6">
-                  {p.github_url && (
-                    <a
-                      href={p.github_url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-cyan"
-                    >
-                      <Github className="h-3.5 w-3.5" /> source
-                    </a>
+                  {(p.github_url || p.live_url || hasCaseStudy(p)) && (
+                    <div className="mt-auto flex flex-wrap items-center gap-3 pt-8">
+                      {hasCaseStudy(p) && (
+                        <button
+                          type="button"
+                          onClick={() => setCaseStudy(p)}
+                          className="inline-flex items-center gap-2 bg-ink px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-background"
+                        >
+                          <FileText className="h-3.5 w-3.5" /> case study
+                        </button>
+                      )}
+                      {p.live_url && (
+                        <a
+                          href={p.live_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-2 border border-foreground/25 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-ink hover:text-background"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" /> live
+                        </a>
+                      )}
+                      {p.github_url && (
+                        <a
+                          href={p.github_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="inline-flex items-center gap-2 border border-foreground/25 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-ink hover:text-background"
+                        >
+                          <Github className="h-3.5 w-3.5" /> source
+                        </a>
+                      )}
+                    </div>
                   )}
-                  {p.live_url && (
-                    <a
-                      href={p.live_url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-cyan"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" /> live demo
-                    </a>
-                  )}
-                  {hasCaseStudy(p) && (
-                    <button
-                      type="button"
-                      onClick={() => setCaseStudy(p)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/10 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-cyan transition hover:bg-cyan/20"
-                    >
-                      <FileText className="h-3.5 w-3.5" /> case study
-                    </button>
-                  )}
-                </div>
-              </motion.article>
+                </Card>
+              </motion.div>
             ))}
           </AnimatePresence>
         </div>
-      </div>
+
+        {!filtered.length && (
+          <Reveal>
+            <p className="border border-border p-8 text-sm text-muted-foreground">
+              Nothing in this category yet.
+            </p>
+          </Reveal>
+        )}
+      </Section>
 
       <AnimatePresence>
-        {caseStudy && (
-          <CaseStudyModal project={caseStudy} onClose={() => setCaseStudy(null)} />
-        )}
+        {caseStudy && <CaseStudyModal project={caseStudy} onClose={() => setCaseStudy(null)} />}
       </AnimatePresence>
-    </section>
+    </>
   );
 }
