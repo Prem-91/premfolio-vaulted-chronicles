@@ -70,7 +70,7 @@ export function Reveal({
         opacity: inView ? 1 : 0,
         transform: inView ? "none" : HIDDEN[variant],
         clipPath: variant === "clip" ? (inView ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)") : undefined,
-        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, clip-path ${duration}s ${EASE} ${delay}s`,
+        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, clip-path ${duration}s ${EASE} ${delay}s, border-color 0.45s ease`,
         willChange: "opacity, transform",
       }}
       {...rest}
