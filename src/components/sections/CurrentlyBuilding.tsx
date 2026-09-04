@@ -1,6 +1,6 @@
 import { Github } from "lucide-react";
 import type { Project } from "@/lib/content.functions";
-import { Section, Reveal, Card } from "@/components/Section";
+import { Section, Card } from "@/components/Section";
 
 export function CurrentlyBuilding({ projects }: { projects: Project[] }) {
   const items = projects.filter((p) => p.status === "building");
@@ -16,8 +16,7 @@ export function CurrentlyBuilding({ projects }: { projects: Project[] }) {
     >
       <div className="grid gap-px md:grid-cols-2">
         {items.map((p, i) => (
-          <Reveal key={p.id} delay={i * 0.08}>
-            <Card className="flex h-full flex-col p-6 sm:p-10">
+          <Card key={p.id} delay={i * 0.08} className="flex h-full flex-col p-6 sm:p-10">
               <div className="flex items-center gap-3">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping bg-cyan opacity-75" />
@@ -50,8 +49,7 @@ export function CurrentlyBuilding({ projects }: { projects: Project[] }) {
                   <Github className="h-3.5 w-3.5" /> follow along
                 </a>
               )}
-            </Card>
-          </Reveal>
+          </Card>
         ))}
       </div>
     </Section>

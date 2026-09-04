@@ -56,14 +56,11 @@ export function Projects({ projects }: { projects: Project[] }) {
               <motion.div
                 layout
                 key={p.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: (i % 4) * 0.06, ease: [0.16, 1, 0.3, 1] }}
                 className={p.featured || i === 0 ? "md:col-span-4" : "md:col-span-2"}
               >
                 <Card
+                  delay={(i % 4) * 0.08}
                   onMouseMove={spotlight}
                   className="group flex h-full flex-col p-6 sm:p-8"
                 >

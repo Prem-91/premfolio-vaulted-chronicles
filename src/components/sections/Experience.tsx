@@ -1,7 +1,6 @@
-import { motion } from "framer-motion";
 import { GraduationCap, Briefcase } from "lucide-react";
 import type { Experience as Item } from "@/lib/content.functions";
-import { Section } from "@/components/Section";
+import { Section, Reveal } from "@/components/Section";
 
 export function Experience({ items }: { items: Item[] }) {
   return (
@@ -17,12 +16,12 @@ export function Experience({ items }: { items: Item[] }) {
         {items.map((item, i) => {
           const Icon = item.kind === "edu" ? GraduationCap : Briefcase;
           return (
-            <motion.article
+            <Reveal
+              as="article"
               key={item.id}
-              initial={{ opacity: 0, x: -14 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.55, delay: i * 0.07 }}
+              variant="left"
+              duration={0.8}
+              delay={i * 0.07}
               className="relative grid gap-5 border-b border-border py-7 pl-14 sm:grid-cols-[10rem_1fr] sm:gap-10 sm:pl-16"
             >
               <span className="absolute left-2.5 top-8 flex h-5 w-5 items-center justify-center border border-cyan bg-background sm:left-[18px]">
@@ -38,7 +37,7 @@ export function Experience({ items }: { items: Item[] }) {
                   {item.detail}
                 </p>
               </div>
-            </motion.article>
+            </Reveal>
           );
         })}
       </div>

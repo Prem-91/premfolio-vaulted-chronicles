@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { X, Camera } from "lucide-react";
 import type { Moment } from "@/lib/content.functions";
-import { Section } from "@/components/Section";
+import { Section, Reveal } from "@/components/Section";
 
 export function Moments({ items }: { items: Moment[] }) {
   const [lightbox, setLightbox] = useState<Moment | null>(null);
@@ -13,13 +13,14 @@ export function Moments({ items }: { items: Moment[] }) {
         <div className="honeycomb">
           {items.map((m, i) => (
             <div key={m.id} className="hex-cell">
-              <motion.button
+              <Reveal
+                as="button"
                 type="button"
                 onClick={() => setLightbox(m)}
-                initial={{ opacity: 0, scale: 0.85 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.4, delay: (i % 8) * 0.04 }}
+                variant="scale"
+                duration={0.7}
+                amount={0.1}
+                delay={(i % 8) * 0.05}
                 className="hex group"
                 aria-label={`Open ${m.title}`}
               >
@@ -30,7 +31,7 @@ export function Moments({ items }: { items: Moment[] }) {
                     {(m.category || m.location) && <span className="mt-1 block font-mono text-[8px] uppercase tracking-widest text-cyan">{m.category}{m.category && m.location ? " · " : ""}{m.location}</span>}
                   </span>
                 </span>
-              </motion.button>
+              </Reveal>
             </div>
           ))}
         </div>
