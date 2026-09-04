@@ -13,23 +13,19 @@ export function SmoothScroll() {
     (async () => {
       const { default: Lenis } = await import("lenis");
       if (cancelled) return;
-      const instance = new Lenis({ duration: 1.1, smoothWheel: true, touchMultiplier: 1.4 });
+      const instance = new Lenis({ duration: 1.1, smoothWheel: true, touchMultiplier: 1.4, anchors: true } as never);
       lenis = instance as unknown as { raf: (t: number) => void; destroy: () => void };
       const loop = (time: number) => {
         instance.raf(time);
         raf = requestAnimationFrame(loop);
       };
       raf = requestAnimationFrame(loop);
-
-      // keep anchor links working with lenis
-      document.documentElement.style.scrollBehavior = "auto";
     })();
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
       lenis?.destroy();
-      document.documentElement.style.scrollBehavior = "";
     };
   }, []);
 
