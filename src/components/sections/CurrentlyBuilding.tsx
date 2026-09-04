@@ -1,6 +1,6 @@
 import { Github } from "lucide-react";
 import type { Project } from "@/lib/content.functions";
-import { Section, Reveal, Card } from "@/components/Section";
+import { Section, Card } from "@/components/Section";
 
 export function CurrentlyBuilding({ projects }: { projects: Project[] }) {
   const items = projects.filter((p) => p.status === "building");
