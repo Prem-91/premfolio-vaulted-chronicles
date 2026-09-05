@@ -231,11 +231,9 @@ export function Section({
               <MaskText text={title} />
             </h2>
             {intro && (
-              <Reveal delay={0.18} duration={0.8}>
-                <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  {intro}
-                </p>
-              </Reveal>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                <TypeLine text={intro} delay={0.25} speed={14} />
+              </p>
             )}
           </div>
           {aside && (
