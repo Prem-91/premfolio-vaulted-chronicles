@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Github, ExternalLink, FileText } from "lucide-react";
+import { Github, ExternalLink, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Project } from "@/lib/content.functions";
 import { ALL_CATEGORIES } from "@/lib/profile";
 import { CaseStudyModal, hasCaseStudy } from "./CaseStudyModal";
@@ -15,14 +15,26 @@ function spotlight(e: React.MouseEvent<HTMLDivElement>) {
   el.style.setProperty("--my", `${e.clientY - r.top}px`);
 }
 
+const PAGE_SIZE = 4;
+
 export function Projects({ projects }: { projects: Project[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   const [caseStudy, setCaseStudy] = useState<Project | null>(null);
+  const [page, setPage] = useState(0);
+  const [dir, setDir] = useState(1);
 
   const filtered = useMemo(
     () => (filter === "All" ? projects : projects.filter((p) => p.categories.includes(filter))),
     [filter, projects],
   );
+
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, pages - 1);
+  const shown = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+  const go = (step: number) => {
+    setDir(step);
+    setPage((prev) => (prev + step + pages) % pages);
+  };
 
   return (
     <>
@@ -37,7 +49,7 @@ export function Projects({ projects }: { projects: Project[] }) {
             {FILTERS.map((f) => (
               <button
                 key={f}
-                onClick={() => setFilter(f)}
+                onClick={() => { setFilter(f); setPage(0); }}
                 className={`border px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition ${
                   filter === f
                     ? "border-ink bg-ink text-background"
@@ -51,12 +63,14 @@ export function Projects({ projects }: { projects: Project[] }) {
         }
       >
         <div className="grid grid-cols-1 md:grid-cols-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((p, i) => (
+          <AnimatePresence mode="wait" initial={false}>
+            {shown.map((p, i) => (
               <motion.div
-                layout
-                key={p.id}
-                exit={{ opacity: 0, y: -8 }}
+                key={`${current}-${p.id}`}
+                initial={{ opacity: 0, x: dir * 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: dir * -40 }}
+                transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                 className={p.featured || i === 0 ? "md:col-span-4" : "md:col-span-2"}
               >
                 <Card
@@ -66,7 +80,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="label">
-                      {String(i + 1).padStart(2, "0")} {p.year ? `/ ${p.year}` : ""}
+                      {String(current * PAGE_SIZE + i + 1).padStart(2, "0")} {p.year ? `/ ${p.year}` : ""}
                     </span>
                     <span className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
                       {p.status}
@@ -129,6 +143,32 @@ export function Projects({ projects }: { projects: Project[] }) {
             ))}
           </AnimatePresence>
         </div>
+
+        {pages > 1 && (
+          <div className="mt-px flex items-center justify-between border border-border">
+            <div className="flex">
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                aria-label="Previous projects"
+                className="flex h-12 w-12 items-center justify-center border-r border-border transition hover:bg-ink hover:text-background"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                aria-label="Next projects"
+                className="flex h-12 w-12 items-center justify-center border-r border-border transition hover:bg-ink hover:text-background"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            <span className="label pr-4">
+              {String(current + 1).padStart(2, "0")} / {String(pages).padStart(2, "0")}
+            </span>
+          </div>
+        )}
 
         {!filtered.length && (
           <Reveal>
