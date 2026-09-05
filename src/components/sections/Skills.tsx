@@ -32,7 +32,7 @@ export function Skills({ groups }: { groups: SkillsGroup[] }) {
                   variant="up"
                   duration={0.6}
                   delay={0.1 + j * 0.03}
-                  className="text-sm text-foreground transition-colors hover:text-cyan"
+                  className="inline-block text-sm text-foreground transition-colors hover:text-cyan"
                 >
                   {s}
                 </Reveal>
