@@ -1,15 +1,33 @@
-import { motion, useScroll, useSpring } from "framer-motion";
+import { useEffect, useState } from "react";
 
-/** Thin ink progress hairline pinned to the top of the viewport. */
+/** Short vertical marker riding the right edge, as in the reference. */
 export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 24, restDelta: 0.001 });
+  const [p, setP] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setP(max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   return (
-    <motion.div
-      aria-hidden
-      style={{ scaleX }}
-      className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-px origin-left bg-ink"
-    />
+    <div aria-hidden className="pointer-events-none fixed right-0 top-0 z-[70] hidden h-screen w-[3px] sm:block">
+      <div
+        className="absolute right-0 h-[14vh] w-[3px] bg-ink"
+        style={{
+          top: `calc(${p * 100}% - ${p * 14}vh)`,
+          transition: "top 0.12s linear",
+        }}
+      />
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUpRight, Github, Linkedin, Download } from "lucide-react";
 import { Typewriter } from "@/components/Typewriter";
+import { TypeLine, Reveal } from "@/components/Section";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
 
@@ -33,11 +34,14 @@ const TICKER = [
   "Tailwind",
 ];
 
+/** Waits for the intro curtain to lift before the hero plays. */
+const INTRO = 1.9;
+
 const line = {
   hidden: { y: "110%" },
   show: (i: number) => ({
     y: "0%",
-    transition: { duration: 1, delay: 0.15 + i * 0.12, ease: [0.16, 1, 0.3, 1] as const },
+    transition: { duration: 1, delay: INTRO + i * 0.12, ease: [0.16, 1, 0.3, 1] as const },
   }),
 };
 
@@ -75,7 +79,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.1, delay: INTRO - 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="h-px w-full origin-left bg-border"
           />
 
@@ -112,15 +116,20 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.8 }}
+            transition={{ delay: INTRO + 0.55, duration: 0.8 }}
             className="mt-10 grid gap-8 border-t border-border pt-8 lg:grid-cols-[1.1fr_1fr]"
           >
             <div>
               <p className="label">
-                AI &amp; Full-Stack Developer — Computer Engineering Student @ SPPU
+                <TypeLine
+                  text="AI & Full-Stack Developer — Computer Engineering Student @ "
+                  highlight="SPPU"
+                  delay={INTRO + 0.7}
+                  speed={22}
+                />
               </p>
               <div className="mt-5 min-h-[3.2rem] font-display text-[clamp(1.1rem,3.4vw,1.9rem)] font-light tracking-wide text-foreground">
-                <Typewriter text={phrases} startDelay={900} loop speed={55} />
+                <Typewriter text={phrases} startDelay={2900} loop speed={55} />
               </div>
             </div>
 
@@ -178,19 +187,23 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.7 }}
+            transition={{ delay: INTRO + 0.85, duration: 0.7 }}
             className="mt-12 grid grid-cols-2 border-t border-border sm:grid-cols-4"
           >
             {STATS.map((s, i) => (
-              <div
+              <Reveal
                 key={s.label}
+                variant="clip"
+                duration={0.9}
+                delay={INTRO + 0.9 + i * 0.1}
+                amount={0.01}
                 className={`border-b border-border px-4 py-6 sm:border-b-0 ${
                   i > 0 ? "sm:border-l" : ""
                 } ${i % 2 === 1 ? "border-l" : ""}`}
               >
                 <div className="display-thin text-3xl sm:text-4xl">{s.big}</div>
                 <div className="label mt-3">{s.label}</div>
-              </div>
+              </Reveal>
             ))}
           </motion.div>
         </div>

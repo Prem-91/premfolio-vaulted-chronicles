@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Mail, Github, Linkedin, Send } from "lucide-react";
 import { toast } from "sonner";
 import type { About } from "@/lib/content.functions";
 import { PROFILE } from "@/lib/profile";
-import { Section } from "@/components/Section";
+import { Section, Reveal } from "@/components/Section";
 
 export function Contact({ about }: { about: About | null }) {
   const [sending, setSending] = useState(false);
@@ -36,14 +35,14 @@ export function Contact({ about }: { about: About | null }) {
           </div>
           <p className="mt-16 max-w-xs text-sm leading-relaxed text-muted-foreground">No contact number — email and professional links are the best way to reach me.</p>
         </div>
-        <motion.form onSubmit={onSubmit} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.55 }} className="bg-background p-6 sm:p-10">
+        <Reveal as="form" onSubmit={onSubmit} variant="clip" duration={1} className="bg-background p-6 sm:p-10">
           <div className="grid gap-6 sm:grid-cols-2">
             <label className="block"><span className="label">Your name</span><input name="name" required maxLength={100} className="mt-3 w-full border-b border-border bg-transparent px-0 py-3 text-sm outline-none transition focus:border-cyan" /></label>
             <label className="block"><span className="label">Email address</span><input name="email" type="email" required maxLength={160} className="mt-3 w-full border-b border-border bg-transparent px-0 py-3 text-sm outline-none transition focus:border-cyan" /></label>
           </div>
           <label className="mt-8 block"><span className="label">Message</span><textarea name="message" required maxLength={2000} rows={5} className="mt-3 w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm outline-none transition focus:border-cyan" /></label>
           <button type="submit" disabled={sending} className="mt-8 inline-flex items-center gap-2 bg-ink px-5 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-background transition hover:bg-cyan disabled:opacity-40"><Send className="h-3.5 w-3.5" /> {sending ? "opening…" : "send message"}</button>
-        </motion.form>
+        </Reveal>
       </div>
       <footer className="flex flex-wrap justify-between gap-3 border-t border-border pt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"><span>© {new Date().getFullYear()} Prem Shinde</span><span>designed & built from scratch · &lt;/&gt; with care</span></footer>
     </Section>

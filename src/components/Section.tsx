@@ -118,6 +118,68 @@ export function MaskText({
   );
 }
 
+/**
+ * Character-by-character reveal. `highlight` renders a solid ink block behind
+ * the trailing phrase, the way the reference types a line then boxes a word.
+ */
+export function TypeLine({
+  text,
+  highlight,
+  className = "",
+  speed = 26,
+  delay = 0,
+}: {
+  text: string;
+  highlight?: string;
+  className?: string;
+  speed?: number;
+  delay?: number;
+}) {
+  const { ref, inView } = useInView<HTMLSpanElement>(0.2);
+  const [count, setCount] = useState(0);
+  const total = text.length;
+
+  useEffect(() => {
+    if (!inView) return;
+    let i = 0;
+    let timer: ReturnType<typeof setInterval>;
+    const start = setTimeout(() => {
+      timer = setInterval(() => {
+        i += 1;
+        setCount(i);
+        if (i >= total) clearInterval(timer);
+      }, speed);
+    }, delay * 1000);
+    return () => {
+      clearTimeout(start);
+      clearInterval(timer);
+    };
+  }, [inView, total, speed, delay]);
+
+  const done = count >= total;
+
+  return (
+    <span ref={ref} className={className}>
+      <span>{text.slice(0, count)}</span>
+      <span className="opacity-0">{text.slice(count)}</span>
+      {!done && <span className="ml-[1px] inline-block h-[1em] w-[2px] translate-y-[0.12em] bg-foreground align-baseline" />}
+      {highlight && (
+        <span
+          className="ml-2 inline-block px-2"
+          style={{
+            background: done ? "var(--ink)" : "transparent",
+            color: done ? "var(--background)" : "transparent",
+            clipPath: done ? "inset(0 0 0 0)" : "inset(0 100% 0 0)",
+            transition: "clip-path 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, background 0.2s linear 0.2s, color 0.2s linear 0.2s",
+          }}
+        >
+          {highlight}
+        </span>
+      )}
+    </span>
+  );
+}
+
 /** Hairline that draws left-to-right when scrolled into view. */
 export function DrawRule({ className = "", delay = 0 }: { className?: string; delay?: number }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.05);
@@ -169,11 +231,9 @@ export function Section({
               <MaskText text={title} />
             </h2>
             {intro && (
-              <Reveal delay={0.18} duration={0.8}>
-                <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  {intro}
-                </p>
-              </Reveal>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                <TypeLine text={intro} delay={0.25} speed={14} />
+              </p>
             )}
           </div>
           {aside && (
