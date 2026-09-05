@@ -1,6 +1,5 @@
-import { motion } from "framer-motion";
 import type { SkillsGroup } from "@/lib/content.functions";
-import { Section } from "@/components/Section";
+import { Section, Reveal } from "@/components/Section";
 
 export function Skills({ groups }: { groups: SkillsGroup[] }) {
   return (
@@ -14,12 +13,11 @@ export function Skills({ groups }: { groups: SkillsGroup[] }) {
     >
       <div className="grid border-t border-border sm:grid-cols-2 lg:grid-cols-3">
         {groups.map((g, i) => (
-          <motion.div
+          <Reveal
             key={g.id}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.5, delay: i * 0.06 }}
+            variant="clip"
+            duration={1}
+            delay={(i % 3) * 0.08}
             className={`border-b border-border p-6 sm:p-8 ${i % 2 ? "sm:border-l" : ""} lg:border-l ${i % 3 === 0 ? "lg:border-l-0" : ""}`}
           >
             <div className="flex items-center justify-between">
@@ -27,11 +25,20 @@ export function Skills({ groups }: { groups: SkillsGroup[] }) {
               <span className="font-mono text-[10px] text-muted-foreground">{String(g.items.length).padStart(2, "0")}</span>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3">
-              {g.items.map((s) => (
-                <span key={s} className="text-sm text-foreground transition-colors hover:text-cyan">{s}</span>
+              {g.items.map((s, j) => (
+                <Reveal
+                  key={s}
+                  as="span"
+                  variant="up"
+                  duration={0.6}
+                  delay={0.1 + j * 0.03}
+                  className="text-sm text-foreground transition-colors hover:text-cyan"
+                >
+                  {s}
+                </Reveal>
               ))}
             </div>
-          </motion.div>
+          </Reveal>
         ))}
       </div>
     </Section>
