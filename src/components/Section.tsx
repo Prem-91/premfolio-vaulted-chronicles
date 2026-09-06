@@ -23,10 +23,18 @@ export function useInView<T extends HTMLElement>(amount = 0.15) {
           }
         }
       },
-      { threshold: Math.min(Math.max(amount, 0), 0.95), rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0, rootMargin: "0px 0px -6% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    // Safety net: never leave content permanently hidden.
+    const fallback = setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) setInView(true);
+    }, 1200);
+    return () => {
+      clearTimeout(fallback);
+      io.disconnect();
+    };
   }, [amount]);
 
   return { ref, inView } as const;
@@ -61,6 +69,9 @@ export function Reveal({
   as?: ElementType;
   className?: string;
 } & Record<string, unknown>) {
+  // NOTE: the observed element must never be clipped — a clip-path on the
+  // observed node makes the browser report a zero intersection ratio, so the
+  // reveal would never fire. Masking happens via opacity/transform only.
   const { ref, inView } = useInView<HTMLDivElement>(amount);
   return (
     <Tag
@@ -69,8 +80,7 @@ export function Reveal({
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? "none" : HIDDEN[variant],
-        clipPath: variant === "clip" ? (inView ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)") : undefined,
-        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, clip-path ${duration}s ${EASE} ${delay}s, border-color 0.45s ease`,
+        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, border-color 0.45s ease`,
         willChange: "opacity, transform",
       }}
       {...rest}

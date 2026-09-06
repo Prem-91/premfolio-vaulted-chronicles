@@ -6,7 +6,7 @@ export function Experience({ items }: { items: Item[] }) {
   return (
     <Section
       id="experience"
-      index="06"
+      index="05"
       label="journey"
       title="Experience & education"
       intro="The places, people and disciplines that shaped how I build."

@@ -5,7 +5,7 @@ export function Skills({ groups }: { groups: SkillsGroup[] }) {
   return (
     <Section
       id="skills"
-      index="09"
+      index="08"
       label="stack"
       title="Tools of the trade"
       intro="A practical toolkit, organised by the work it supports."

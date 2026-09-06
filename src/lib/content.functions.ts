@@ -420,3 +420,55 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
     if (!email) return { isAdmin: false };
     return { isAdmin: await isAllowlistedEmail(email) };
   });
+
+// ---------- CONTACT MESSAGES ----------
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+const contactInput = z.object({
+  name: z.string().trim().min(1).max(100),
+  email: z.string().trim().email().max(255),
+  message: z.string().trim().min(1).max(2000),
+});
+
+export const submitContactMessage = createServerFn({ method: "POST" })
+  .inputValidator((d: z.infer<typeof contactInput>) => contactInput.parse(d))
+  .handler(async ({ data }) => {
+    enforceRateLimit("contact");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("contact_messages").insert({
+      name: data.name,
+      email: data.email,
+      message: data.message,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const listContactMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const { data, error } = await context.supabase
+      .from("contact_messages")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ContactMessage[];
+  });
+
+export const deleteContactMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const { error } = await context.supabase.from("contact_messages").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });

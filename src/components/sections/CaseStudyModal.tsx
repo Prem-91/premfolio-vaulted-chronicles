@@ -45,7 +45,6 @@ export function CaseStudyModal({ project, onClose }: { project: Project; onClose
 
         <div className="flex flex-wrap items-center gap-4 pr-12">
           <span className="label">case study</span>
-          {project.year && <span className="label">{project.year}</span>}
           <span className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
             {project.status}
           </span>
