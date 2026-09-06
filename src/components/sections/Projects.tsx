@@ -80,7 +80,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="label">
-                      {String(current * PAGE_SIZE + i + 1).padStart(2, "0")} {p.year ? `/ ${p.year}` : ""}
+                      {String(current * PAGE_SIZE + i + 1).padStart(2, "0")}
                     </span>
                     <span className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
                       {p.status}
