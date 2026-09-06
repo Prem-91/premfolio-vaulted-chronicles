@@ -18,14 +18,29 @@ import { getPortfolio } from "@/lib/content.functions";
 
 const portfolioQO = queryOptions({ queryKey: ["portfolio"], queryFn: () => getPortfolio() });
 
+const PERSON_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Prem Shinde",
+  jobTitle: "AI & Full-Stack Developer",
+  url: "https://premshinde.lovable.app",
+  address: { "@type": "PostalAddress", addressLocality: "Pune", addressRegion: "Maharashtra", addressCountry: "IN" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "TSSM's BSCOER, Savitribai Phule Pune University" },
+  sameAs: ["https://github.com/Prem-91", "https://www.linkedin.com/in/premshinde0/"],
+};
+
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [
-    { title: "Prem Shinde — AI & Full-Stack Developer" },
-    { name: "description", content: "Portfolio of Prem Shinde, an AI and full-stack developer building practical digital solutions, cloud systems and thoughtful software." },
-    { property: "og:title", content: "Prem Shinde — AI & Full-Stack Developer" },
-    { property: "og:description", content: "AI-powered applications, full-stack systems and practical digital solutions by Prem Shinde." },
-    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Prem Shinde — AI & Full-Stack Developer" },
+      { name: "description", content: "Portfolio of Prem Shinde, an AI and full-stack developer building practical digital solutions, cloud systems and thoughtful software." },
+      { property: "og:title", content: "Prem Shinde — AI & Full-Stack Developer" },
+      { property: "og:description", content: "AI-powered applications, full-stack systems and practical digital solutions by Prem Shinde." },
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://premshinde.lovable.app/" }],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(PERSON_JSONLD) }],
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(portfolioQO),
   component: Index,
   errorComponent: ({ error }) => { console.error(error); return <div className="p-10 text-center text-sm text-muted-foreground">Unable to load the portfolio right now. Please try again later.</div>; },
