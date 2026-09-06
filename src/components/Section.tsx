@@ -61,6 +61,9 @@ export function Reveal({
   as?: ElementType;
   className?: string;
 } & Record<string, unknown>) {
+  // NOTE: the observed element must never be clipped — a clip-path on the
+  // observed node makes the browser report a zero intersection ratio, so the
+  // reveal would never fire. Masking happens via opacity/transform only.
   const { ref, inView } = useInView<HTMLDivElement>(amount);
   return (
     <Tag
@@ -69,8 +72,7 @@ export function Reveal({
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? "none" : HIDDEN[variant],
-        clipPath: variant === "clip" ? (inView ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)") : undefined,
-        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, clip-path ${duration}s ${EASE} ${delay}s, border-color 0.45s ease`,
+        transition: `opacity ${duration}s ${EASE} ${delay}s, transform ${duration}s ${EASE} ${delay}s, border-color 0.45s ease`,
         willChange: "opacity, transform",
       }}
       {...rest}
