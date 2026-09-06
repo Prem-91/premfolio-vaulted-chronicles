@@ -7,7 +7,7 @@ export function Achievements({ items }: { items: Achievement[] }) {
   return (
     <Section
       id="achievements"
-      index="07"
+      index="06"
       label="achievements"
       title="Recognition, earned"
       intro="Milestones that matter because they represent consistency, service and curiosity."

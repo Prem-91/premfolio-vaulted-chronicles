@@ -9,7 +9,7 @@ const PLANNED = [
 
 export function Writing() {
   return (
-    <Section id="writing" index="10" label="writing" title="Notes & write-ups" intro="Technical articles on what I build, learn and break. First pieces are in draft.">
+    <Section id="writing" index="09" label="writing" title="Notes & write-ups" intro="Technical articles on what I build, learn and break. First pieces are in draft.">
       <div className="grid border-t border-border sm:grid-cols-3">
         {PLANNED.map((title, i) => (
           <Reveal

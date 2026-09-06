@@ -8,7 +8,7 @@ export function Moments({ items }: { items: Moment[] }) {
   const [lightbox, setLightbox] = useState<Moment | null>(null);
   if (!items.length) return null;
   return (
-    <Section id="moments" index="08" label="beyond the code" title="Events & memories" intro="Snapshots from the rooms, communities and conversations that happen away from the keyboard." wide aside={<span className="label inline-flex items-center gap-2"><Camera className="h-3 w-3 text-cyan" /> {items.length} captured</span>}>
+    <Section id="moments" index="07" label="beyond the code" title="Events & memories" intro="Snapshots from the rooms, communities and conversations that happen away from the keyboard." wide aside={<span className="label inline-flex items-center gap-2"><Camera className="h-3 w-3 text-cyan" /> {items.length} captured</span>}>
       <div className="moments-scroll max-h-[62vh] overflow-y-auto overflow-x-hidden px-1 pb-16 pt-2 sm:max-h-[70vh]">
         <div className="honeycomb">
           {items.map((m, i) => (
