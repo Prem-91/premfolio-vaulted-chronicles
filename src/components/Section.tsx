@@ -23,10 +23,18 @@ export function useInView<T extends HTMLElement>(amount = 0.15) {
           }
         }
       },
-      { threshold: Math.min(Math.max(amount, 0), 0.95), rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0, rootMargin: "0px 0px -6% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    // Safety net: never leave content permanently hidden.
+    const fallback = setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) setInView(true);
+    }, 1200);
+    return () => {
+      clearTimeout(fallback);
+      io.disconnect();
+    };
   }, [amount]);
 
   return { ref, inView } as const;
