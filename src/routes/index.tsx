@@ -7,7 +7,7 @@ import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { WhatIBuild } from "@/components/sections/WhatIBuild";
 import { Projects } from "@/components/sections/Projects";
-import { CurrentlyBuilding } from "@/components/sections/CurrentlyBuilding";
+
 import { Experience } from "@/components/sections/Experience";
 import { Achievements } from "@/components/sections/Achievements";
 import { Moments } from "@/components/sections/Moments";
