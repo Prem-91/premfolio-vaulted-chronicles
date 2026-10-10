@@ -26,6 +26,7 @@ export type Database = {
           long_bio: string
           name: string
           resume_url: string
+          site_content: Json
           tagline: string
           updated_at: string
         }
@@ -40,6 +41,7 @@ export type Database = {
           long_bio: string
           name: string
           resume_url: string
+          site_content?: Json
           tagline: string
           updated_at?: string
         }
@@ -54,6 +56,7 @@ export type Database = {
           long_bio?: string
           name?: string
           resume_url?: string
+          site_content?: Json
           tagline?: string
           updated_at?: string
         }
