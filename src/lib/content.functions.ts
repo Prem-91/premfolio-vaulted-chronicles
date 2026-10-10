@@ -19,6 +19,8 @@ export type About = {
   linkedin_url: string;
   resume_url: string;
   current_focus: string | null;
+  site_content?: Record<string, unknown>;
+  resume_reference?: string;
 };
 export type Project = {
   id: string;
@@ -85,6 +87,10 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
     supabaseAdmin.from("achievements").select("*").order("sort_order", { ascending: true }),
   ]);
 
+  for (const result of [aboutQ, projectsQ, expQ, skillsQ, momentsQ, achievementsQ]) {
+    if (result.error) throw new Error(`Portfolio content could not be loaded: ${result.error.message}`);
+  }
+
   const moments: Moment[] = await Promise.all(
     (momentsQ.data ?? []).map(async (m: any) => {
       const { data: signed } = await supabaseAdmin.storage
@@ -95,6 +101,7 @@ export const getPortfolio = createServerFn({ method: "GET" }).handler(async () =
   );
 
   let about = (aboutQ.data ?? null) as About | null;
+  if (about) about = { ...about, resume_reference: about.resume_url };
   if (about?.resume_url?.startsWith("storage:")) {
     const path = about.resume_url.slice("storage:".length);
     const { data: signed } = await supabaseAdmin.storage
@@ -184,6 +191,7 @@ export const updateAbout = createServerFn({ method: "POST" })
         linkedin_url: z.string().url().optional(),
         resume_url: z.string().min(1).max(500).optional(),
         current_focus: z.string().max(200).nullable().optional(),
+        site_content: z.record(z.unknown()).optional(),
       })
       .parse(d),
   )
@@ -370,6 +378,31 @@ export const deleteMoment = createServerFn({ method: "POST" })
       .single();
     if (row?.image_path) await supabaseAdmin.storage.from(BUCKET).remove([row.image_path]);
     const { error } = await supabaseAdmin.from("moments").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+const momentUpdateInput = z.object({
+  id: z.string().uuid(), title: z.string().trim().min(1).max(200),
+  event_date: z.string().nullable().optional(), caption: z.string().max(500).nullable().optional(),
+  category: z.string().max(60).nullable().optional(), location: z.string().max(120).nullable().optional(),
+  sort_order: z.number().int().optional(),
+  image_base64: z.string().optional(), content_type: z.string().regex(/^image\//).optional(), filename: z.string().max(200).optional(),
+});
+export const updateMoment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof momentUpdateInput>) => momentUpdateInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.claims, context.userId);
+    const { id, image_base64, content_type, filename, ...patch } = data;
+    let imagePath: string | undefined;
+    if (image_base64 && content_type && filename) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      imagePath = `${crypto.randomUUID()}-${filename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error } = await supabaseAdmin.storage.from(BUCKET).upload(imagePath, Buffer.from(image_base64, "base64"), { contentType: content_type });
+      if (error) throw new Error(error.message);
+    }
+    const { error } = await context.supabase.from("moments").update({ ...patch, ...(imagePath ? { image_path: imagePath } : {}) }).eq("id", id).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

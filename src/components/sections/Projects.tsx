@@ -4,7 +4,8 @@ import { Github, ExternalLink, FileText, ChevronLeft, ChevronRight } from "lucid
 import type { Project } from "@/lib/content.functions";
 import { ALL_CATEGORIES } from "@/lib/profile";
 import { CaseStudyModal, hasCaseStudy } from "./CaseStudyModal";
-import { Section, Reveal, Card } from "@/components/Section";
+import { Section, Reveal } from "@/components/Section";
+import { Button } from "@/components/ui/button";
 
 const FILTERS = ["All", ...ALL_CATEGORIES] as const;
 
@@ -47,7 +48,7 @@ export function Projects({ projects }: { projects: Project[] }) {
         aside={
           <div className="flex flex-wrap gap-px">
             {FILTERS.map((f) => (
-              <button
+              <Button variant="ghost"
                 key={f}
                 onClick={() => { setFilter(f); setPage(0); }}
                 className={`border px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition ${
@@ -57,26 +58,25 @@ export function Projects({ projects }: { projects: Project[] }) {
                 }`}
               >
                 {f}
-              </button>
+              </Button>
             ))}
           </div>
         }
       >
-        <div className="grid grid-cols-1 md:grid-cols-6">
-          <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={`${filter}-${current}`} initial={false} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: dir * -24 }} transition={{ duration: 0.2 }} className="grid grid-cols-1 md:grid-cols-2">
             {shown.map((p, i) => (
               <motion.div
                 key={`${current}-${p.id}`}
-                initial={{ opacity: 0, x: dir * 40 }}
+                initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: dir * -40 }}
                 transition={{ duration: 0.55, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                className={p.featured || i === 0 ? "md:col-span-4" : "md:col-span-2"}
+                className="min-w-0"
               >
-                <Card
-                  delay={(i % 4) * 0.08}
+                <div
                   onMouseMove={spotlight}
-                  className="group flex h-full flex-col p-6 sm:p-8"
+                  className="spotlight group relative flex h-full flex-col border border-border bg-background/60 p-6 sm:p-8"
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="label">
@@ -108,13 +108,13 @@ export function Projects({ projects }: { projects: Project[] }) {
                   {(p.github_url || p.live_url || hasCaseStudy(p)) && (
                     <div className="mt-auto flex flex-wrap items-center gap-3 pt-8">
                       {hasCaseStudy(p) && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setCaseStudy(p)}
                           className="inline-flex items-center gap-2 bg-ink px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-background"
                         >
                           <FileText className="h-3.5 w-3.5" /> case study
-                        </button>
+                        </Button>
                       )}
                       {p.live_url && (
                         <a
@@ -138,31 +138,31 @@ export function Projects({ projects }: { projects: Project[] }) {
                       )}
                     </div>
                   )}
-                </Card>
+                </div>
               </motion.div>
             ))}
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
 
         {pages > 1 && (
           <div className="mt-px flex items-center justify-between border border-border">
             <div className="flex">
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => go(-1)}
                 aria-label="Previous projects"
                 className="flex h-12 w-12 items-center justify-center border-r border-border transition hover:bg-ink hover:text-background"
               >
                 <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 type="button"
                 onClick={() => go(1)}
                 aria-label="Next projects"
                 className="flex h-12 w-12 items-center justify-center border-r border-border transition hover:bg-ink hover:text-background"
               >
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <span className="label pr-4">
               {String(current + 1).padStart(2, "0")} / {String(pages).padStart(2, "0")}

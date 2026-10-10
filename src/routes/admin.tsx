@@ -20,6 +20,9 @@ import {
   Lock,
   ExternalLink,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DEFAULT_SITE_CONTENT, siteContent } from "@/lib/site-content";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getPortfolio,
@@ -42,12 +45,18 @@ import {
   type SkillsGroup,
   type Moment,
   uploadResume,
+  updateMoment, listContactMessages, deleteContactMessage, type ContactMessage,
 } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Admin · Prem Shinde" },
+      { name: "description", content: "Manage Prem Shinde’s portfolio content and messages." },
+      { property: "og:title", content: "Portfolio Admin · Prem Shinde" },
+      { property: "og:description", content: "Private portfolio content management." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -89,7 +98,7 @@ function AdminPage() {
 
   return (
     <div className="grain relative min-h-screen overflow-hidden bg-background">
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster theme="light" position="bottom-right" />
       <div className="grid-bg pointer-events-none absolute inset-0 opacity-40" />
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/" className="font-display text-lg font-bold">
@@ -184,20 +193,20 @@ function AuthGate() {
             className="mt-1 w-full rounded-lg border border-border bg-background/40 px-3 py-2 outline-none focus:border-cyan"
           />
         </label>
-        <button
+        <Button variant="ghost"
           disabled={busy}
           type="submit"
           className="w-full rounded-lg bg-cyan py-3 font-semibold text-primary-foreground transition hover:glow-cyan disabled:opacity-40"
         >
           {busy ? "…" : mode === "in" ? "Sign in" : "Sign up"}
-        </button>
-        <button
+        </Button>
+        <Button variant="ghost"
           type="button"
           onClick={() => setMode((m) => (m === "in" ? "up" : "in"))}
           className="block w-full text-center font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-cyan"
         >
           {mode === "in" ? "First time? Sign up" : "Already have an account? Sign in"}
-        </button>
+        </Button>
       </form>
     </div>
   );
@@ -210,21 +219,22 @@ function NotAuthorized({ email }: { email?: string }) {
       <p className="mt-3 text-sm text-muted-foreground">
         {email ? `${email} is not on the admin allowlist.` : "Your account isn't an admin."}
       </p>
-      <button
+      <Button variant="ghost"
         onClick={() => supabase.auth.signOut()}
-        className="mt-6 rounded-full border border-border bg-white/5 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
+        className="mt-6 rounded-full border border-border bg-background/60 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
       >
         Sign out
-      </button>
+      </Button>
     </div>
   );
 }
 
 // ---------------- DASHBOARD ----------------
 
-type Tab = "about" | "projects" | "experiences" | "achievements" | "skills" | "moments";
+type Tab = "copy" | "messages" | "about" | "projects" | "experiences" | "achievements" | "skills" | "moments";
 
 function Dashboard({ email }: { email?: string }) {
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("about");
   const [data, setData] = useState<Awaited<ReturnType<typeof getPortfolio>> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -234,12 +244,13 @@ function Dashboard({ email }: { email?: string }) {
     try {
       const d = await getPortfolio();
       setData(d);
+      queryClient.setQueryData(["portfolio"], d);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to load");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     refresh();
@@ -247,8 +258,10 @@ function Dashboard({ email }: { email?: string }) {
 
   const tabs: { id: Tab; label: string; icon: any; count?: number }[] = [
     { id: "about", label: "About", icon: User },
+    { id: "copy", label: "Page content", icon: Pencil },
+    { id: "messages", label: "Messages", icon: Briefcase },
     { id: "projects", label: "Work", icon: Briefcase, count: data?.projects.length },
-    { id: "experiences", label: "Journey", icon: GraduationCap, count: data?.experiences.length },
+    { id: "experiences", label: "Experience", icon: GraduationCap, count: data?.experiences.length },
     {
       id: "achievements",
       label: "Achievements",
@@ -271,35 +284,35 @@ function Dashboard({ email }: { email?: string }) {
         <div className="flex gap-2">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
           >
             <ExternalLink className="h-4 w-4" /> View site
           </Link>
-          <button
+          <Button variant="ghost"
             onClick={() => supabase.auth.signOut()}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan"
           >
             <LogOut className="h-4 w-4" /> Sign out
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-2 border-b border-border pb-3">
         {tabs.map((t) => (
-          <button
+          <Button variant="ghost"
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition ${
               tab === t.id
                 ? "border-cyan bg-cyan/15 text-cyan"
-                : "border-border bg-white/5 text-muted-foreground hover:border-cyan/40 hover:text-foreground"
+                : "border-border bg-background/60 text-muted-foreground hover:border-cyan/40 hover:text-foreground"
             }`}
           >
             <t.icon className="h-3.5 w-3.5" /> {t.label}
             {typeof t.count === "number" && (
-              <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px]">{t.count}</span>
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">{t.count}</span>
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -310,6 +323,10 @@ function Dashboard({ email }: { email?: string }) {
           </p>
         ) : tab === "about" ? (
           <AboutEditor about={data.about} onSaved={refresh} />
+        ) : tab === "copy" ? (
+          <SiteCopyEditor about={data.about} onSaved={refresh} />
+        ) : tab === "messages" ? (
+          <MessagesEditor />
         ) : tab === "projects" ? (
           <ProjectsEditor items={data.projects} onChanged={refresh} />
         ) : tab === "experiences" ? (
@@ -335,20 +352,20 @@ const cardCls = "rounded-2xl border border-border glass p-5";
 const btnPrimary =
   "inline-flex items-center gap-2 rounded-full bg-cyan px-4 py-2 text-sm font-semibold text-primary-foreground hover:glow-cyan disabled:opacity-40";
 const btnGhost =
-  "inline-flex items-center gap-2 rounded-full border border-border bg-white/5 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan";
+  "inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-4 py-2 text-sm hover:border-cyan/40 hover:text-cyan";
 
 function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button onClick={onClick} className={btnPrimary}>
+    <Button variant="ghost" onClick={onClick} className={btnPrimary}>
       <Plus className="h-4 w-4" /> {label}
-    </button>
+    </Button>
   );
 }
 
 // ---------------- ABOUT ----------------
 
 function AboutEditor({ about, onSaved }: { about: About | null; onSaved: () => void }) {
-  const [form, setForm] = useState<About | null>(about);
+  const [form, setForm] = useState<About | null>(about ? { ...about, resume_url: about.resume_reference ?? about.resume_url } : null);
   const [busy, setBusy] = useState(false);
   if (!form) return <p>No profile row found.</p>;
 
@@ -401,9 +418,9 @@ function AboutEditor({ about, onSaved }: { about: About | null; onSaved: () => v
       <ResumeUpload aboutId={form.id} onDone={onSaved} />
       <div className="mt-4">{F("long_bio", "Long bio", "textarea")}</div>
       <div className="mt-5 flex justify-end">
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save changes"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -425,7 +442,7 @@ function ResumeUpload({ aboutId, onDone }: { aboutId: string; onDone: () => void
         const buf = await file.arrayBuffer();
         let binary = "";
         const bytes = new Uint8Array(buf);
-        for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]!);
+        for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i] ?? 0);
         await uploadResume({
           data: {
             id: aboutId,
@@ -455,7 +472,7 @@ function ResumeUpload({ aboutId, onDone }: { aboutId: string; onDone: () => void
     <div
       {...getRootProps()}
       className={`mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition ${
-        isDragActive ? "border-cyan bg-cyan/5" : "border-border bg-white/5 hover:border-cyan/50"
+        isDragActive ? "border-cyan bg-cyan/5" : "border-border bg-background/60 hover:border-cyan/50"
       }`}
     >
       <input {...getInputProps()} />
@@ -520,18 +537,18 @@ function ProjectsEditor({ items, onChanged }: { items: Project[]; onChanged: () 
                 </p>
               </div>
               <div className="flex gap-1">
-                <button
+                <Button variant="ghost"
                   onClick={() => setEditing(p)}
-                  className="rounded-md p-1.5 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   onClick={() => remove(p.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
             <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{p.description}</p>
@@ -539,7 +556,7 @@ function ProjectsEditor({ items, onChanged }: { items: Project[]; onChanged: () 
               {p.stack.slice(0, 6).map((s) => (
                 <span
                   key={s}
-                  className="rounded-md border border-border bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+                  className="rounded-md border border-border bg-background/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
                 >
                   {s}
                 </span>
@@ -713,7 +730,7 @@ function ProjectForm({
           className={inputCls}
         >
           <option value="shipped">shipped</option>
-          <option value="building">currently building</option>
+          <option value="building">in progress</option>
           <option value="concept">concept</option>
         </select>
       </label>
@@ -737,10 +754,10 @@ function ProjectForm({
         </label>
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button onClick={onCancel} className={btnGhost}>Cancel</button>
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        <Button variant="ghost" onClick={onCancel} className={btnGhost}>Cancel</Button>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -789,18 +806,18 @@ function ExperienceEditor({ items, onChanged }: { items: Experience[]; onChanged
                 <p className="mt-2 text-sm text-foreground/80">{it.detail}</p>
               </div>
               <div className="flex gap-1">
-                <button
+                <Button variant="ghost"
                   onClick={() => setEditing(it)}
-                  className="rounded-md p-1.5 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   onClick={() => remove(it.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -897,10 +914,10 @@ function ExperienceForm({
         />
       </label>
       <div className="flex justify-end gap-2 pt-2">
-        <button onClick={onCancel} className={btnGhost}>Cancel</button>
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        <Button variant="ghost" onClick={onCancel} className={btnGhost}>Cancel</Button>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -938,25 +955,25 @@ function SkillsEditor({ items, onChanged }: { items: SkillsGroup[]; onChanged: (
             <div className="flex items-start justify-between gap-3">
               <div className="font-mono text-xs uppercase tracking-widest text-cyan">{g.name}</div>
               <div className="flex gap-1">
-                <button
+                <Button variant="ghost"
                   onClick={() => setEditing(g)}
-                  className="rounded-md p-1 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   onClick={() => remove(g.id)}
                   className="rounded-md p-1 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {g.items.map((s) => (
                 <span
                   key={s}
-                  className="rounded-md border border-border bg-white/5 px-2 py-0.5 text-xs text-foreground/85"
+                  className="rounded-md border border-border bg-background/60 px-2 py-0.5 text-xs text-foreground/85"
                 >
                   {s}
                 </span>
@@ -1041,10 +1058,10 @@ function SkillForm({
         />
       </label>
       <div className="flex justify-end gap-2 pt-2">
-        <button onClick={onCancel} className={btnGhost}>Cancel</button>
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        <Button variant="ghost" onClick={onCancel} className={btnGhost}>Cancel</Button>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1098,18 +1115,18 @@ function AchievementsEditor({
                 {it.detail && <p className="mt-2 text-sm text-foreground/80">{it.detail}</p>}
               </div>
               <div className="flex gap-1">
-                <button
+                <Button variant="ghost"
                   onClick={() => setEditing(it)}
-                  className="rounded-md p-1.5 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
-                </button>
-                <button
+                </Button>
+                <Button variant="ghost"
                   onClick={() => remove(it.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1207,12 +1224,12 @@ function AchievementForm({
         />
       </label>
       <div className="flex justify-end gap-2 pt-2">
-        <button onClick={onCancel} className={btnGhost}>
+        <Button variant="ghost" onClick={onCancel} className={btnGhost}>
           Cancel
-        </button>
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        </Button>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Saving…" : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1222,6 +1239,7 @@ function AchievementForm({
 
 function MomentsEditor({ items, onChanged }: { items: Moment[]; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Moment | null>(null);
 
   const remove = async (id: string) => {
     if (!confirm("Delete this moment?")) return;
@@ -1237,7 +1255,7 @@ function MomentsEditor({ items, onChanged }: { items: Moment[]; onChanged: () =>
   return (
     <div>
       <div className="mb-5 flex justify-end">
-        <AddButton onClick={() => setOpen(true)} label="Add moment" />
+        <AddButton onClick={() => { setEditing(null); setOpen(true); }} label="Add moment" />
       </div>
 
       {items.length === 0 ? (
@@ -1259,19 +1277,22 @@ function MomentsEditor({ items, onChanged }: { items: Moment[]; onChanged: () =>
                 )}
                 {m.caption && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{m.caption}</p>}
               </div>
-              <button
+              <Button variant="outline" aria-label={`Edit ${m.title}`} onClick={() => { setEditing(m); setOpen(true); }} className="absolute left-2 top-2">
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" aria-label={`Delete ${m.title}`}
                 onClick={() => remove(m.id)}
-                className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition group-hover:opacity-100 hover:bg-destructive"
+                className="absolute right-2 top-2 rounded-full bg-ink p-1.5 text-background transition hover:bg-destructive"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
       )}
 
       <Modal open={open} onClose={() => setOpen(false)}>
-        <MomentForm
+        <MomentForm key={editing?.id ?? "new"} initial={editing}
           onCancel={() => setOpen(false)}
           onSaved={() => {
             setOpen(false);
@@ -1283,14 +1304,15 @@ function MomentsEditor({ items, onChanged }: { items: Moment[]; onChanged: () =>
   );
 }
 
-function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () => void }) {
+function MomentForm({ initial, onCancel, onSaved }: { initial: Moment | null; onCancel: () => void; onSaved: () => void }) {
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [caption, setCaption] = useState("");
-  const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
+  const [preview, setPreview] = useState<string | null>(initial?.url ?? null);
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [date, setDate] = useState(initial?.event_date ?? "");
+  const [caption, setCaption] = useState(initial?.caption ?? "");
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [location, setLocation] = useState(initial?.location ?? "");
+  const [order, setOrder] = useState(initial?.sort_order ?? 999);
   const [busy, setBusy] = useState(false);
 
   const onDrop = useCallback((acc: File[]) => {
@@ -1308,28 +1330,22 @@ function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   });
 
   const save = async () => {
-    if (!file || !title.trim()) {
+    if ((!file && !initial) || !title.trim()) {
       toast.error("Add a title and image.");
       return;
     }
     setBusy(true);
     try {
-      const buf = await file.arrayBuffer();
-      let bin = "";
-      const bytes = new Uint8Array(buf);
-      for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
-      await createMoment({
-        data: {
-          title: title.trim(),
-          event_date: date || null,
-          caption: caption.trim() || null,
-          image_base64: btoa(bin),
-          content_type: file.type || "image/jpeg",
-          filename: file.name,
-          category: category.trim() || null,
-          location: location.trim() || null,
-        },
-      });
+      let image = {};
+      if (file) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        let bin = "";
+        for (const byte of bytes) bin += String.fromCharCode(byte);
+        image = { image_base64: btoa(bin), content_type: file.type || "image/jpeg", filename: file.name };
+      }
+      const metadata = { title: title.trim(), event_date: date || null, caption: caption.trim() || null, category: category.trim() || null, location: location.trim() || null, sort_order: order };
+      if (initial) await updateMoment({ data: { ...metadata, id: initial.id, ...image } });
+      else if (file) await createMoment({ data: { ...metadata, image_base64: (image as { image_base64: string }).image_base64, content_type: file.type || "image/jpeg", filename: file.name } });
       toast.success("Saved.");
       onSaved();
     } catch (e: any) {
@@ -1341,11 +1357,11 @@ function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
 
   return (
     <div className="space-y-4">
-      <h2 className="font-display text-2xl font-bold">Add moment</h2>
+      <h2 className="font-display text-2xl font-bold">{initial ? "Edit moment" : "Add moment"}</h2>
       <div
         {...getRootProps()}
         className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition ${
-          isDragActive ? "border-cyan bg-cyan/10" : "border-border bg-white/5 hover:border-cyan/40"
+          isDragActive ? "border-cyan bg-cyan/10" : "border-border bg-background/60 hover:border-cyan/40"
         }`}
       >
         <input {...getInputProps()} />
@@ -1379,11 +1395,16 @@ function MomentForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
           className={inputCls}
         />
       </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label><span className={labelCls}>Category</span><input value={category} onChange={e => setCategory(e.target.value)} className={inputCls} /></label>
+        <label><span className={labelCls}>Location</span><input value={location} onChange={e => setLocation(e.target.value)} className={inputCls} /></label>
+        <label><span className={labelCls}>Order</span><input type="number" value={order} onChange={e => setOrder(Number(e.target.value))} className={inputCls} /></label>
+      </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button onClick={onCancel} className={btnGhost}>Cancel</button>
-        <button onClick={save} disabled={busy} className={btnPrimary}>
+        <Button variant="ghost" onClick={onCancel} className={btnGhost}>Cancel</Button>
+        <Button variant="ghost" onClick={save} disabled={busy} className={btnPrimary}>
           <Save className="h-4 w-4" /> {busy ? "Uploading…" : "Save"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1407,7 +1428,7 @@ function Modal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur sm:p-8"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/70 p-4 backdrop-blur sm:p-8"
           onClick={onClose}
         >
           <motion.div
@@ -1417,16 +1438,41 @@ function Modal({
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-2xl rounded-2xl border border-border bg-background/95 p-6 shadow-2xl"
           >
-            <button
+            <Button variant="ghost"
               onClick={onClose}
-              className="absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground hover:bg-white/10 hover:text-cyan"
+              className="absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
             {children}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
+}
+
+function SiteCopyEditor({ about, onSaved }: { about: About | null; onSaved: () => void }) {
+  const [draft, setDraft] = useState(siteContent(about));
+  const [busy, setBusy] = useState(false);
+  if (!about) return null;
+  return <div className={cardCls}><h2 className="display-thin text-2xl">Page content</h2><div className="mt-6 grid gap-4">
+    {Object.entries(DEFAULT_SITE_CONTENT).map(([key, fallback]) => <label key={key}><span className={labelCls}>{key.replaceAll("_", " ")}</span>
+      <textarea rows={typeof fallback === "string" ? 3 : 7} className={inputCls} defaultValue={typeof draft[key as keyof typeof draft] === "string" ? String(draft[key as keyof typeof draft]) : JSON.stringify(draft[key as keyof typeof draft], null, 2)} onBlur={e => {
+        try { const value = typeof fallback === "string" ? e.target.value : JSON.parse(e.target.value); setDraft(prev => ({ ...prev, [key]: value })); }
+        catch { toast.error("Please enter a valid list for this field."); }
+      }} /></label>)}
+    <Button disabled={busy} onClick={async () => { setBusy(true); try { await updateAbout({ data: { id: about.id, site_content: draft } }); toast.success("Page content updated."); onSaved(); } catch { toast.error("Could not save page content."); } finally { setBusy(false); } }}><Save />Save page content</Button>
+  </div></div>;
+}
+
+function MessagesEditor() {
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const refresh = useCallback(async () => { try { setMessages(await listContactMessages()); } catch { toast.error("Could not load messages."); } finally { setLoading(false); } }, []);
+  useEffect(() => { refresh(); }, [refresh]);
+  return <div className="space-y-4">{loading ? <p>Loading messages…</p> : !messages.length ? <p>No messages yet.</p> : messages.map(m => <article key={m.id} className={cardCls}>
+    <div className="flex justify-between gap-4"><div><h3>{m.name}</h3><a href={`mailto:${m.email}`} className="text-cyan text-sm">{m.email}</a><p className="label mt-2">{new Date(m.created_at).toLocaleDateString()}</p></div>
+    <Button variant="outline" size="icon" aria-label={`Delete message from ${m.name}`} onClick={async () => { if (!confirm("Delete this message?")) return; try { await deleteContactMessage({ data: { id: m.id } }); await refresh(); } catch { toast.error("Could not delete message."); } }}><Trash2 /></Button></div><p className="mt-4 whitespace-pre-wrap break-words text-sm">{m.message}</p>
+  </article>)}</div>;
 }
