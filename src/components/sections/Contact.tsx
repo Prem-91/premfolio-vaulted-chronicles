@@ -3,6 +3,7 @@ import { Mail, Github, Linkedin, Send } from "lucide-react";
 import { toast } from "sonner";
 import type { About } from "@/lib/content.functions";
 import { submitContactMessage } from "@/lib/content.functions";
+import { siteContent } from "@/lib/site-content";
 import { PROFILE } from "@/lib/profile";
 import { Section, Reveal } from "@/components/Section";
 
@@ -49,7 +50,7 @@ export function Contact({ about }: { about: About | null }) {
           </div>
           <div className="mt-12 border-t border-border pt-6">
             <p className="label">response time</p>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">Messages land straight in my inbox. I usually reply within a day or two.</p>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">{siteContent(about).contact_note}</p>
           </div>
         </div>
         <Reveal as="form" onSubmit={onSubmit} variant="up" duration={1} className="bg-background p-6 sm:p-10">
@@ -61,7 +62,7 @@ export function Contact({ about }: { about: About | null }) {
           <button type="submit" disabled={sending} className="mt-8 inline-flex items-center gap-2 bg-ink px-5 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-background transition hover:bg-cyan disabled:opacity-40"><Send className="h-3.5 w-3.5" /> {sending ? "sending…" : "send message"}</button>
         </Reveal>
       </div>
-      <footer className="flex flex-wrap justify-between gap-3 border-t border-border pt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"><span>© Prem Shinde</span><span>designed &amp; built from scratch · &lt;/&gt; with care</span></footer>
+      <footer className="flex flex-wrap justify-between gap-3 border-t border-border pt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"><span>© {name}</span><span>{siteContent(about).footer}</span></footer>
     </Section>
   );
 }

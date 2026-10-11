@@ -1,4 +1,8 @@
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+
+import type { SiteContent } from "@/lib/site-content";
+const SiteContentContext = createContext<SiteContent | null>(null);
+export const SiteContentProvider = SiteContentContext.Provider;
 
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -226,6 +230,7 @@ export function Section({
   children: ReactNode;
   wide?: boolean;
 }) {
+  const copy = useContext(SiteContentContext);
   return (
     <section id={id} className="relative w-full py-20 sm:py-28">
       <DrawRule className="absolute inset-x-0 top-0" />
@@ -238,7 +243,7 @@ export function Section({
               </p>
             </Reveal>
             <h2 className="display-thin mt-4 text-[clamp(1.9rem,6vw,4rem)] text-foreground">
-              <MaskText text={title} />
+              <MaskText text={copy?.section_titles?.[id] ?? title} />
             </h2>
             {intro && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">

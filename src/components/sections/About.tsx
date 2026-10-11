@@ -1,4 +1,5 @@
 import type { About as AboutData } from "@/lib/content.functions";
+import { siteContent } from "@/lib/site-content";
 import { PROFILE } from "@/lib/profile";
 import { Section, Reveal } from "@/components/Section";
 
@@ -7,14 +8,14 @@ export function About({ about }: { about: AboutData | null }) {
   const initials = about?.initials ?? PROFILE.initials;
   const bio = about?.long_bio ?? "";
   const location = about?.location ?? PROFILE.location;
-  const focus = about?.current_focus ?? "Building RoadFix AI";
+  const focus = about?.current_focus ?? "Engineering portfolio";
   const github = about?.github_url ?? PROFILE.github;
   const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
 
   const specs = [
     { k: "Name", v: name },
     { k: "Based in", v: location },
-    { k: "Education", v: "TSSM's BSCOER · SPPU · Computer Engineering" },
+    { k: "Education", v: siteContent(about).education },
     { k: "Currently", v: focus },
   ];
 
