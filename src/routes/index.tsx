@@ -14,6 +14,8 @@ import { Moments } from "@/components/sections/Moments";
 import { Skills } from "@/components/sections/Skills";
 import { Writing } from "@/components/sections/Writing";
 import { Contact } from "@/components/sections/Contact";
+import { SiteContentProvider } from "@/components/Section";
+import { siteContent } from "@/lib/site-content";
 import { getPortfolio } from "@/lib/content.functions";
 
 const portfolioQO = queryOptions({ queryKey: ["portfolio"], queryFn: () => getPortfolio() });
@@ -48,5 +50,5 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data } = useSuspenseQuery(portfolioQO);
-  return <main id="top" className="relative pb-24"><Toaster theme="light" position="bottom-right" /><Nav about={data.about} /><Hero about={data.about} stats={{ projects: data.projects.length, technologies: new Set(data.skills.flatMap((g) => g.items)).size, roles: data.experiences.length, moments: data.moments.length }} /><About about={data.about} /><WhatIBuild /><Projects projects={data.projects} /><Experience items={data.experiences} /><Achievements items={data.achievements} /><Moments items={data.moments} /><Skills groups={data.skills} /><Writing /><Contact about={data.about} /><BottomDock /></main>;
+  return <SiteContentProvider value={siteContent(data.about)}><main id="top" className="relative pb-24"><Toaster theme="light" position="bottom-right" /><Nav about={data.about} /><Hero about={data.about} stats={{ projects: data.projects.length, technologies: new Set(data.skills.flatMap((g) => g.items)).size, roles: data.experiences.length, moments: data.moments.length }} /><About about={data.about} /><WhatIBuild about={data.about} /><Projects projects={data.projects} /><Experience items={data.experiences} /><Achievements items={data.achievements} /><Moments items={data.moments} /><Skills groups={data.skills} /><Writing about={data.about} /><Contact about={data.about} /><BottomDock /></main></SiteContentProvider>;
 }

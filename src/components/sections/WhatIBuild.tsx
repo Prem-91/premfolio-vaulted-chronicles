@@ -1,4 +1,6 @@
 import { Brain, Layers, Cloud, Wrench } from "lucide-react";
+import type { About } from "@/lib/content.functions";
+import { siteContent } from "@/lib/site-content";
 import { Section, Reveal } from "@/components/Section";
 
 const CARDS = [
@@ -28,7 +30,9 @@ const CARDS = [
   },
 ];
 
-export function WhatIBuild() {
+export function WhatIBuild({ about }: { about: About | null }) {
+  const cards = siteContent(about).build_cards;
+  const icons = [Brain, Layers, Cloud, Wrench];
   return (
     <Section
       id="what-i-build"
@@ -38,7 +42,7 @@ export function WhatIBuild() {
       intro="A short map of the problems I keep coming back to."
     >
       <div className="grid grid-cols-1 border-t border-border sm:grid-cols-2 lg:grid-cols-4">
-        {CARDS.map(({ Icon, title, detail }, i) => (
+        {cards.map(({ title, detail }, i) => { const Icon = icons[i % icons.length] ?? Wrench; return (
           <Reveal key={title} delay={i * 0.07}>
             <div
               className={`group h-full border-b border-border px-6 py-8 transition-colors duration-500 hover:bg-ink hover:text-background ${
@@ -57,7 +61,7 @@ export function WhatIBuild() {
               </p>
             </div>
           </Reveal>
-        ))}
+        ); })}
       </div>
     </Section>
   );

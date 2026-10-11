@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUpRight, Github, Linkedin, Download } from "lucide-reac
 import { Typewriter } from "@/components/Typewriter";
 import { TypeLine, Reveal } from "@/components/Section";
 import type { About } from "@/lib/content.functions";
+import { siteContent } from "@/lib/site-content";
 import { PROFILE } from "@/lib/profile";
 
 export type HeroStats = {
@@ -46,21 +47,17 @@ const line = {
 };
 
 export function Hero({ about }: { about: About | null; stats: HeroStats }) {
+  const content = siteContent(about);
   const name = about?.name ?? PROFILE.name;
   const tagline = about?.tagline ?? PROFILE.tagline;
   const resumeUrl = about?.resume_url ?? PROFILE.resumeUrl;
   const github = about?.github_url ?? PROFILE.github;
   const linkedin = about?.linkedin_url ?? PROFILE.linkedin;
   const location = about?.location ?? PROFILE.location;
-  const focus = about?.current_focus ?? "Building RoadFix AI";
+  const focus = about?.current_focus ?? "Engineering portfolio";
   const parts = name.split(" ");
 
-  const phrases = [
-    tagline,
-    "Building AI-powered applications",
-    "Shipping full-stack systems",
-    "Exploring cloud & developer tooling",
-  ].filter(Boolean);
+  const phrases = [tagline, ...content.hero_phrases].filter(Boolean);
 
   return (
     <>
@@ -84,7 +81,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
           />
 
           <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
-            <p className="label">01. portfolio / {new Date().getFullYear()}</p>
+            <p className="label">01. portfolio</p>
             <p className="label">{location}</p>
           </div>
 
@@ -122,8 +119,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
             <div>
               <p className="label">
                 <TypeLine
-                  text="AI & Full-Stack Developer — Computer Engineering Student @ "
-                  highlight="SPPU"
+                  text={content.hero_identity}
                   delay={INTRO + 0.7}
                   speed={22}
                 />
@@ -135,8 +131,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
 
             <div className="lg:border-l lg:border-border lg:pl-8">
               <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-                I build AI-powered applications, full-stack systems, and practical digital solutions
-                that solve real-world problems.
+                {content.hero_statement}
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -176,7 +171,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
               </div>
 
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                <span>TSSM&apos;s BSCOER · SPPU</span>
+                <span>{content.education}</span>
                 <span className="inline-flex items-center gap-2">
                   <span className="h-1 w-1 animate-pulse bg-cyan" /> {focus}
                 </span>
@@ -190,7 +185,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
             transition={{ delay: INTRO + 0.85, duration: 0.7 }}
             className="mt-12 grid grid-cols-2 border-t border-border sm:grid-cols-4"
           >
-            {STATS.map((s, i) => (
+            {content.hero_stats.map((s, i) => (
               <Reveal
                 key={s.label}
                 variant="clip"
@@ -221,7 +216,7 @@ export function Hero({ about }: { about: About | null; stats: HeroStats }) {
         <div className="marquee-track">
           {[0, 1].map((k) => (
             <span key={k} className="flex shrink-0 items-center">
-              {TICKER.map((t) => (
+              {content.ticker.map((t) => (
                 <span
                   key={`${k}-${t}`}
                   className="mx-6 font-mono text-[10px] uppercase tracking-[0.3em] text-background/70"
