@@ -1453,7 +1453,7 @@ function Modal({
 }
 
 function CopyFields({ value, onChange, name }: { value: unknown; onChange: (value: unknown) => void; name: string }) {
-  if (typeof value === "string") return <label className="block"><span className={labelCls}>{name.replaceAll("_", " ")}</span><textarea value={value} rows={2} className={inputCls} onChange={e => onChange(e.target.value)} /></label>;
+  if (typeof value === "string") return <label className="block"><span className={labelCls}>{name.replaceAll("_", " ")}</span><textarea aria-label={name.replaceAll("_", " ")} value={value} rows={2} className={inputCls} onChange={e => onChange(e.target.value)} /></label>;
   if (Array.isArray(value)) return <div className="space-y-4"><h3 className={labelCls}>{name.replaceAll("_", " ")}</h3>{value.map((item, i) => <div key={i} className="flex items-start gap-3 border-b border-border pb-4"><div className="min-w-0 flex-1"><CopyFields name={`${name.replaceAll("_", " ")} ${i + 1}`} value={item} onChange={next => onChange(value.map((old, j) => j === i ? next : old))} /></div><Button variant="outline" size="icon" aria-label={`Remove ${name} ${i + 1}`} onClick={() => onChange(value.filter((_, j) => j !== i))}><Trash2 /></Button></div>)}<Button variant="outline" onClick={() => { const first = value[0]; const blank = first && typeof first === "object" ? Object.fromEntries(Object.keys(first).map(key => [key, ""])) : ""; onChange([...value, blank]); }}><Plus />Add item</Button></div>;
   if (value && typeof value === "object") return <div className="grid gap-4">{Object.entries(value).map(([key, item]) => <CopyFields key={key} name={key} value={item} onChange={next => onChange({ ...value, [key]: next })} />)}</div>;
   return null;
