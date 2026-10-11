@@ -21,7 +21,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DEFAULT_SITE_CONTENT, siteContent } from "@/lib/site-content";
+import { DEFAULT_SITE_CONTENT, siteContent, siteContentSchema } from "@/lib/site-content";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -538,13 +538,13 @@ function ProjectsEditor({ items, onChanged }: { items: Project[]; onChanged: () 
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost"
-                  onClick={() => setEditing(p)}
+                  aria-label={`Edit ${p.name}`} onClick={() => setEditing(p)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost"
-                  onClick={() => remove(p.id)}
+                  aria-label={`Delete ${p.name}`} onClick={() => remove(p.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -807,13 +807,13 @@ function ExperienceEditor({ items, onChanged }: { items: Experience[]; onChanged
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost"
-                  onClick={() => setEditing(it)}
+                  aria-label={`Edit ${it.title}`} onClick={() => setEditing(it)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost"
-                  onClick={() => remove(it.id)}
+                  aria-label={`Delete ${it.title}`} onClick={() => remove(it.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -956,13 +956,13 @@ function SkillsEditor({ items, onChanged }: { items: SkillsGroup[]; onChanged: (
               <div className="font-mono text-xs uppercase tracking-widest text-cyan">{g.name}</div>
               <div className="flex gap-1">
                 <Button variant="ghost"
-                  onClick={() => setEditing(g)}
+                  aria-label={`Edit ${g.name}`} onClick={() => setEditing(g)}
                   className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost"
-                  onClick={() => remove(g.id)}
+                  aria-label={`Delete ${g.name}`} onClick={() => remove(g.id)}
                   className="rounded-md p-1 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -1116,13 +1116,13 @@ function AchievementsEditor({
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost"
-                  onClick={() => setEditing(it)}
+                  aria-label={`Edit ${it.title}`} onClick={() => setEditing(it)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost"
-                  onClick={() => remove(it.id)}
+                  aria-label={`Delete ${it.title}`} onClick={() => remove(it.id)}
                   className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -1439,7 +1439,7 @@ function Modal({
             className="relative w-full max-w-2xl rounded-2xl border border-border bg-background/95 p-6 shadow-2xl"
           >
             <Button variant="ghost"
-              onClick={onClose}
+              aria-label="Close editor" onClick={onClose}
               className="absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-cyan"
             >
               <X className="h-4 w-4" />
@@ -1452,17 +1452,19 @@ function Modal({
   );
 }
 
+function CopyFields({ value, onChange, name }: { value: unknown; onChange: (value: unknown) => void; name: string }) {
+  if (typeof value === "string") return <label className="block"><span className={labelCls}>{name.replaceAll("_", " ")}</span><textarea value={value} rows={2} className={inputCls} onChange={e => onChange(e.target.value)} /></label>;
+  if (Array.isArray(value)) return <div className="space-y-4"><h3 className={labelCls}>{name.replaceAll("_", " ")}</h3>{value.map((item, i) => <div key={i} className="flex items-start gap-3 border-b border-border pb-4"><div className="min-w-0 flex-1"><CopyFields name={`${name.replaceAll("_", " ")} ${i + 1}`} value={item} onChange={next => onChange(value.map((old, j) => j === i ? next : old))} /></div><Button variant="outline" size="icon" aria-label={`Remove ${name} ${i + 1}`} onClick={() => onChange(value.filter((_, j) => j !== i))}><Trash2 /></Button></div>)}<Button variant="outline" onClick={() => { const first = value[0]; const blank = first && typeof first === "object" ? Object.fromEntries(Object.keys(first).map(key => [key, ""])) : ""; onChange([...value, blank]); }}><Plus />Add item</Button></div>;
+  if (value && typeof value === "object") return <div className="grid gap-4">{Object.entries(value).map(([key, item]) => <CopyFields key={key} name={key} value={item} onChange={next => onChange({ ...value, [key]: next })} />)}</div>;
+  return null;
+}
 function SiteCopyEditor({ about, onSaved }: { about: About | null; onSaved: () => void }) {
   const [draft, setDraft] = useState(siteContent(about));
   const [busy, setBusy] = useState(false);
   if (!about) return null;
-  return <div className={cardCls}><h2 className="display-thin text-2xl">Page content</h2><div className="mt-6 grid gap-4">
-    {Object.entries(DEFAULT_SITE_CONTENT).map(([key, fallback]) => <label key={key}><span className={labelCls}>{key.replaceAll("_", " ")}</span>
-      <textarea rows={typeof fallback === "string" ? 3 : 7} className={inputCls} defaultValue={typeof draft[key as keyof typeof draft] === "string" ? String(draft[key as keyof typeof draft]) : JSON.stringify(draft[key as keyof typeof draft], null, 2)} onBlur={e => {
-        try { const value = typeof fallback === "string" ? e.target.value : JSON.parse(e.target.value); setDraft(prev => ({ ...prev, [key]: value })); }
-        catch { toast.error("Please enter a valid list for this field."); }
-      }} /></label>)}
-    <Button disabled={busy} onClick={async () => { setBusy(true); try { await updateAbout({ data: { id: about.id, site_content: draft } }); toast.success("Page content updated."); onSaved(); } catch { toast.error("Could not save page content."); } finally { setBusy(false); } }}><Save />Save page content</Button>
+  return <div><h2 className="display-thin text-2xl">Page content</h2><div className="mt-6 grid gap-8">
+    {Object.entries(draft).map(([key, value]) => <div key={key} className="border-t border-border pt-6"><CopyFields name={key} value={value} onChange={next => setDraft(prev => ({ ...prev, [key]: next }))} /></div>)}
+    <Button disabled={busy} onClick={async () => { setBusy(true); try { const parsed = siteContentSchema.parse(draft); await updateAbout({ data: { id: about.id, site_content: parsed } }); toast.success("Page content updated."); onSaved(); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not save page content."); } finally { setBusy(false); } }}><Save />Save page content</Button>
   </div></div>;
 }
 
