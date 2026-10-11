@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { siteContentSchema, type SiteContent } from "@/lib/site-content";
 
 const BUCKET = "moments";
 const RESUME_BUCKET = "resume";
@@ -19,7 +20,7 @@ export type About = {
   linkedin_url: string;
   resume_url: string;
   current_focus: string | null;
-  site_content?: Record<string, unknown>;
+  site_content?: SiteContent;
   resume_reference?: string;
 };
 export type Project = {
@@ -191,7 +192,7 @@ export const updateAbout = createServerFn({ method: "POST" })
         linkedin_url: z.string().url().optional(),
         resume_url: z.string().min(1).max(500).optional(),
         current_focus: z.string().max(200).nullable().optional(),
-        site_content: z.record(z.unknown()).optional(),
+        site_content: siteContentSchema.optional(),
       })
       .parse(d),
   )
