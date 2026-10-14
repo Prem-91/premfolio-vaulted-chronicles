@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Nav } from "@/components/Nav";
 import { BottomDock } from "@/components/BottomDock";
+import { ChatWidget } from "@/components/ChatWidget";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { WhatIBuild } from "@/components/sections/WhatIBuild";
@@ -50,5 +51,5 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data } = useSuspenseQuery(portfolioQO);
-  return <SiteContentProvider value={siteContent(data.about)}><main id="top" className="relative pb-24"><Toaster theme="light" position="bottom-right" /><Nav about={data.about} /><Hero about={data.about} stats={{ projects: data.projects.length, technologies: new Set(data.skills.flatMap((g) => g.items)).size, roles: data.experiences.length, moments: data.moments.length }} /><About about={data.about} /><WhatIBuild about={data.about} /><Projects projects={data.projects} /><Experience items={data.experiences} /><Achievements items={data.achievements} /><Moments items={data.moments} /><Skills groups={data.skills} /><Writing about={data.about} /><Contact about={data.about} /><BottomDock /></main></SiteContentProvider>;
+  return <SiteContentProvider value={siteContent(data.about)}><main id="top" className="relative pb-24"><Toaster theme="light" position="bottom-right" /><Nav about={data.about} /><Hero about={data.about} stats={{ projects: data.projects.length, technologies: new Set(data.skills.flatMap((g) => g.items)).size, roles: data.experiences.length, moments: data.moments.length }} /><About about={data.about} /><WhatIBuild about={data.about} /><Projects projects={data.projects} /><Experience items={data.experiences} /><Achievements items={data.achievements} /><Moments items={data.moments} /><Skills groups={data.skills} /><Writing about={data.about} /><Contact about={data.about} /><BottomDock /><ChatWidget /></main></SiteContentProvider>;
 }
