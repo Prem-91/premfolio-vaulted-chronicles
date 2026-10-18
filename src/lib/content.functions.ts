@@ -148,6 +148,7 @@ export const uploadResume = createServerFn({ method: "POST" })
       .update({ resume_url: `storage:${path}` })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -203,6 +204,7 @@ export const updateAbout = createServerFn({ method: "POST" })
     const { id, ...patch } = data;
     const { error } = await supabase.from("about_profile").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -250,6 +252,7 @@ export const upsertProject = createServerFn({ method: "POST" })
       ? await supabase.from("projects").update(payload).eq("id", data.id)
       : await supabase.from("projects").insert(payload);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -260,6 +263,7 @@ export const deleteProject = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("projects").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -284,6 +288,7 @@ export const upsertExperience = createServerFn({ method: "POST" })
       ? await context.supabase.from("experiences").update(payload).eq("id", data.id)
       : await context.supabase.from("experiences").insert(payload);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -294,6 +299,7 @@ export const deleteExperience = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("experiences").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -315,6 +321,7 @@ export const upsertSkillGroup = createServerFn({ method: "POST" })
       ? await context.supabase.from("skills_groups").update(payload).eq("id", data.id)
       : await context.supabase.from("skills_groups").insert(payload);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -325,6 +332,7 @@ export const deleteSkillGroup = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("skills_groups").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
