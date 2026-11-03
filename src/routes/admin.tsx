@@ -19,6 +19,7 @@ import {
   Trophy,
   Lock,
   ExternalLink,
+  CloudUpload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SITE_CONTENT, siteContent, siteContentSchema } from "@/lib/site-content";
@@ -47,6 +48,8 @@ import {
   uploadResume,
   updateMoment, listContactMessages, deleteContactMessage, type ContactMessage,
 } from "@/lib/content.functions";
+import { getBackupStatus, backupNow, type BackupStatus } from "@/lib/backup.functions";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -231,7 +234,7 @@ function NotAuthorized({ email }: { email?: string }) {
 
 // ---------------- DASHBOARD ----------------
 
-type Tab = "copy" | "messages" | "about" | "projects" | "experiences" | "achievements" | "skills" | "moments";
+type Tab = "copy" | "messages" | "about" | "projects" | "experiences" | "achievements" | "skills" | "moments" | "backup";
 
 function Dashboard({ email }: { email?: string }) {
   const queryClient = useQueryClient();
@@ -270,6 +273,7 @@ function Dashboard({ email }: { email?: string }) {
     },
     { id: "skills", label: "Stack", icon: Code2, count: data?.skills.length },
     { id: "moments", label: "Moments", icon: Camera, count: data?.moments.length },
+    { id: "backup", label: "Backup", icon: CloudUpload },
   ];
 
   return (
@@ -327,6 +331,8 @@ function Dashboard({ email }: { email?: string }) {
           <SiteCopyEditor about={data.about} onSaved={refresh} />
         ) : tab === "messages" ? (
           <MessagesEditor />
+        ) : tab === "backup" ? (
+          <BackupPanel />
         ) : tab === "projects" ? (
           <ProjectsEditor items={data.projects} onChanged={refresh} />
         ) : tab === "experiences" ? (
@@ -1477,4 +1483,58 @@ function MessagesEditor() {
     <div className="flex justify-between gap-4"><div><h3>{m.name}</h3><a href={`mailto:${m.email}`} className="text-cyan text-sm">{m.email}</a><p className="label mt-2">{new Date(m.created_at).toLocaleDateString()}</p></div>
     <Button variant="outline" size="icon" aria-label={`Delete message from ${m.name}`} onClick={async () => { if (!confirm("Delete this message?")) return; try { await deleteContactMessage({ data: { id: m.id } }); await refresh(); } catch { toast.error("Could not delete message."); } }}><Trash2 /></Button></div><p className="mt-4 whitespace-pre-wrap break-words text-sm">{m.message}</p>
   </article>)}</div>;
+}
+
+function BackupPanel() {
+  const [status, setStatus] = useState<BackupStatus | null>(null);
+  const [running, setRunning] = useState(false);
+  const load = useCallback(async () => {
+    try { setStatus(await getBackupStatus()); } catch { toast.error("Could not load backup status."); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const run = async () => {
+    setRunning(true);
+    try {
+      const result = await backupNow();
+      await load();
+      if (result.ok) toast.success("Backed up successfully.");
+      else toast.error(result.reason);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Backup failed.");
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className={cardCls}>
+        <h3 className="font-display text-xl font-semibold">Content backup</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Every change you save is copied automatically to your own backup project. You can also run a backup at any time.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button onClick={run} disabled={running} className={btnPrimary}>
+            <CloudUpload className="h-4 w-4" /> {running ? "Backing up…" : "Back up now"}
+          </Button>
+          <Button variant="ghost" onClick={load} className={btnGhost}>
+            Refresh status
+          </Button>
+        </div>
+        <div className="mt-4 space-y-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          <p>destination: {status?.configured ? "configured" : "not configured"}</p>
+          <p>
+            last backup:{" "}
+            {status?.lastBackup
+              ? `${new Date(status.lastBackup.at).toLocaleString()} · ${status.lastBackup.ok ? "success" : "failed"}`
+              : "never"}
+          </p>
+          {status?.lastBackup && !status.lastBackup.ok && status.lastBackup.note && (
+            <p className="tracking-normal text-destructive normal-case">{status.lastBackup.note}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

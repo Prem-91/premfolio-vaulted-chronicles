@@ -8,6 +8,13 @@
       "when": 1791651312896,
       "tag": "0000_editable_portfolio_copy",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793709344137,
+      "tag": "0001_create_backup_log",
+      "breakpoints": true
     }
   ]
 }
