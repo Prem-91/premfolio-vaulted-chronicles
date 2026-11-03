@@ -9,7 +9,7 @@ export async function resolveUserEmail(claims: any, userId: string): Promise<str
   return data?.user?.email?.toLowerCase() ?? null;
 }
 
-async function isAllowlistedEmail(email: string): Promise<boolean> {
+export async function isAllowlistedEmail(email: string): Promise<boolean> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("admin_emails")
