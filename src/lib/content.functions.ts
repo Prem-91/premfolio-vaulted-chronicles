@@ -171,7 +171,7 @@ async function isAllowlistedEmail(email: string): Promise<boolean> {
   return !!data;
 }
 
-async function assertAdmin(_supabase: any, claims?: any, userId?: string) {
+export async function assertAdmin(_supabase: any, claims?: any, userId?: string) {
   enforceRateLimit("admin");
   const email = await resolveUserEmail(claims, userId ?? "");
   if (!email || !(await isAllowlistedEmail(email))) throw new Error("Forbidden: admin only");
@@ -372,6 +372,7 @@ export const createMoment = createServerFn({ method: "POST" })
       location: data.location || null,
     });
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -389,6 +390,7 @@ export const deleteMoment = createServerFn({ method: "POST" })
     if (row?.image_path) await supabaseAdmin.storage.from(BUCKET).remove([row.image_path]);
     const { error } = await supabaseAdmin.from("moments").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -414,6 +416,7 @@ export const updateMoment = createServerFn({ method: "POST" })
     }
     const { error } = await context.supabase.from("moments").update({ ...patch, ...(imagePath ? { image_path: imagePath } : {}) }).eq("id", id).select("id").single();
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -443,6 +446,7 @@ export const upsertAchievement = createServerFn({ method: "POST" })
       ? await context.supabase.from("achievements").update(payload).eq("id", data.id)
       : await context.supabase.from("achievements").insert(payload);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -453,6 +457,7 @@ export const deleteAchievement = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("achievements").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
 
@@ -513,5 +518,6 @@ export const deleteContactMessage = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.claims, context.userId);
     const { error } = await context.supabase.from("contact_messages").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    scheduleBackup();
     return { ok: true as const };
   });
