@@ -107,6 +107,30 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_log: {
+        Row: {
+          backed_up_at: string
+          counts: Json | null
+          id: string
+          note: string | null
+          ok: boolean
+        }
+        Insert: {
+          backed_up_at?: string
+          counts?: Json | null
+          id?: string
+          note?: string | null
+          ok: boolean
+        }
+        Update: {
+          backed_up_at?: string
+          counts?: Json | null
+          id?: string
+          note?: string | null
+          ok?: boolean
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
