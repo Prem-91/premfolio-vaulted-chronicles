@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdmin, isAllowlistedEmail, resolveUserEmail } from "@/lib/admin.server";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { runBackup, scheduleBackup, type BackupResult } from "@/lib/backup.server";
 import { siteContentSchema, type SiteContent } from "@/lib/site-content";
@@ -152,30 +153,8 @@ export const uploadResume = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-// ---------- ADMIN HELPER ----------
-async function resolveUserEmail(claims: any, userId: string): Promise<string | null> {
-  const fromClaims = (claims?.email as string | undefined)?.toLowerCase();
-  if (fromClaims) return fromClaims;
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
-  return data?.user?.email?.toLowerCase() ?? null;
-}
+// Admin helpers live in @/lib/admin.server (server-only).
 
-async function isAllowlistedEmail(email: string): Promise<boolean> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("admin_emails")
-    .select("email")
-    .ilike("email", email)
-    .maybeSingle();
-  return !!data;
-}
-
-export async function assertAdmin(_supabase: any, claims?: any, userId?: string) {
-  enforceRateLimit("admin");
-  const email = await resolveUserEmail(claims, userId ?? "");
-  if (!email || !(await isAllowlistedEmail(email))) throw new Error("Forbidden: admin only");
-}
 
 // ---------- ABOUT ----------
 export const updateAbout = createServerFn({ method: "POST" })

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { runBackup, type BackupResult } from "@/lib/backup.server";
-import { assertAdmin } from "@/lib/content.functions";
+import { assertAdmin } from "@/lib/admin.server";
 
 export type BackupStatus = {
   configured: boolean;
