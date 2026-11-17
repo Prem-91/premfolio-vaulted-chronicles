@@ -15,6 +15,13 @@
       "when": 1793709344137,
       "tag": "0001_create_backup_log",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794888269197,
+      "tag": "0002_tighten_selected_public_access",
+      "breakpoints": true
     }
   ]
 }
